@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import (
-    get_all_teams, get_team_by_id, get_leagues,
+    get_all_teams, get_team_by_id,
     LANGUAGE_CHOICES, THEME_CHOICES
 )
 import json
@@ -24,14 +24,12 @@ def home(request):
                 if team:
                     favorite_teams.append(team)
     
-    # Получаем все команды и лиги
+    # Получаем все команды
     all_teams = get_all_teams()
-    leagues = get_leagues()
     
     context = {
         'favorite_teams': favorite_teams,
         'all_teams': all_teams,
-        'leagues': leagues,
         'current_language': language,
         'current_theme': theme,
         'language_choices': LANGUAGE_CHOICES,
@@ -117,7 +115,7 @@ def toggle_favorite(request):
             response = JsonResponse({
                 'success': True,
                 'is_favorite': is_favorite,
-                'message': 'Команда добавлена в избранное' if is_favorite else 'Команда удалена из избранного'
+                'message': 'Team added to favorites' if is_favorite else 'Team removed from favorites'
             })
             
             # Обновляем cookie
@@ -128,18 +126,6 @@ def toggle_favorite(request):
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
     
-    return JsonResponse({'success': False, 'error': 'Метод не поддерживается'})
+    return JsonResponse({'success': False, 'error': 'Method not supported'})
 
-def leagues(request):
-    """Страница с лигами"""
-    leagues_list = get_leagues()
-    teams_by_league = {}
-    
-    for league in leagues_list:
-        teams_by_league[league] = [team for team in get_all_teams() if team['league'] == league]
-    
-    context = {
-        'teams_by_league': teams_by_league,
-    }
-    
-    return render(request, 'leagues.html', context)
+

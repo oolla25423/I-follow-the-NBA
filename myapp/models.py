@@ -1,78 +1,51 @@
 from django.db import models
 
-# Hardcoded team data as requested
+# Hardcoded basketball team data
 TEAMS_DATA = [
     {
         'id': 1,
-        'name': 'Manchester United',
-        'league': 'Premier League',
-        'country': 'England',
-        'logo': 'man_united.png',
-        'founded': 1878,
-        'description': 'One of the most successful clubs in English football history.'
+        'name': 'Los Angeles Lakers',
+        'league': 'NBA',
+        'country': 'USA',
+        'logo': 'lakers.png',
+        'founded': 1947,
+        'description': 'One of the most successful franchises in NBA history.'
     },
     {
         'id': 2,
-        'name': 'Real Madrid',
-        'league': 'La Liga',
-        'country': 'Spain',
-        'logo': 'real_madrid.png',
-        'founded': 1902,
-        'description': 'The most successful club in UEFA Champions League history.'
+        'name': 'Boston Celtics',
+        'league': 'NBA',
+        'country': 'USA',
+        'logo': 'celtics.png',
+        'founded': 1946,
+        'description': 'Historic franchise with the most NBA championships.'
     },
     {
         'id': 3,
-        'name': 'Bayern Munich',
-        'league': 'Bundesliga',
-        'country': 'Germany',
-        'logo': 'bayern_munich.png',
-        'founded': 1900,
-        'description': 'The most successful club in German football.'
+        'name': 'Golden State Warriors',
+        'league': 'NBA',
+        'country': 'USA',
+        'logo': 'warriors.png',
+        'founded': 1946,
+        'description': 'Known for their revolutionary three-point shooting style.'
     },
     {
         'id': 4,
-        'name': 'Barcelona',
-        'league': 'La Liga',
-        'country': 'Spain',
-        'logo': 'barcelona.png',
-        'founded': 1899,
-        'description': 'Famous for their tiki-taka playing style.'
+        'name': 'Chicago Bulls',
+        'league': 'NBA',
+        'country': 'USA',
+        'logo': 'bulls.png',
+        'founded': 1966,
+        'description': 'Famous for the Michael Jordan era and six championships.'
     },
     {
         'id': 5,
-        'name': 'Liverpool',
-        'league': 'Premier League',
-        'country': 'England',
-        'logo': 'liverpool.png',
-        'founded': 1892,
-        'description': 'Famous for their passionate fanbase and "You\'ll Never Walk Alone".'
-    },
-    {
-        'id': 6,
-        'name': 'Juventus',
-        'league': 'Serie A',
-        'country': 'Italy',
-        'logo': 'juventus.png',
-        'founded': 1897,
-        'description': 'The most successful club in Italian football.'
-    },
-    {
-        'id': 7,
-        'name': 'Paris Saint-Germain',
-        'league': 'Ligue 1',
-        'country': 'France',
-        'logo': 'psg.png',
-        'founded': 1970,
-        'description': 'The most successful club in French football in recent years.'
-    },
-    {
-        'id': 8,
-        'name': 'Chelsea',
-        'league': 'Premier League',
-        'country': 'England',
-        'logo': 'chelsea.png',
-        'founded': 1905,
-        'description': 'Based in West London with a rich modern history.'
+        'name': 'Miami Heat',
+        'league': 'NBA',
+        'country': 'USA',
+        'logo': 'heat.png',
+        'founded': 1988,
+        'description': 'Known for their strong team culture and recent success.'
     }
 ]
 

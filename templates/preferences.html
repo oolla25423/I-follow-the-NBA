@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Настройки - Спортивные Фанаты{% endblock %}
+{% block title %}Settings - Basketball Fans{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="preferences-header">
-        <h1><i class="fas fa-cog"></i> Настройки пользователя</h1>
-        <p>Настройте свои предпочтения для лучшего опыта использования</p>
+        <h1><i class="fas fa-cog"></i> User Settings</h1>
+        <p>Configure your preferences for a better experience</p>
     </div>
 
     <form method="post" class="preferences-form">
@@ -15,8 +15,8 @@
         
         <!-- Секция выбора любимых команд -->
         <div class="form-section">
-            <h2><i class="fas fa-heart"></i> Любимые команды</h2>
-            <p class="section-description">Выберите команды, за которыми хотите следить</p>
+            <h2><i class="fas fa-heart"></i> Favorite Teams</h2>
+            <p class="section-description">Choose the teams you want to follow</p>
             
             <div class="teams-selection">
                 {% for team in all_teams %}

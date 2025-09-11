@@ -204,19 +204,6 @@ window.resetSettings = function() {
     FormHandler.resetSettings();
 };
 
-window.filterTeams = function(league) {
-    TeamFilter.filterByLeague(league);
-    
-    const buttons = document.querySelectorAll('.filter-btn');
-    buttons.forEach(btn => {
-        btn.classList.remove('active');
-        if ((league === 'all' && btn.textContent.trim() === 'Все') || 
-            btn.textContent.trim() === league) {
-            btn.classList.add('active');
-        }
-    });
-};
-
 // Инициализация
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Спортивные Фанаты - Инициализация...');

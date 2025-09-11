@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ team.name }} - Спортивные Фанаты{% endblock %}
+{% block title %}{{ team.name }} - Basketball Fans{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -23,10 +23,10 @@
                             onclick="toggleFavorite({{ team.id }})" 
                             id="favorite-btn-{{ team.id }}">
                         <i class="fas fa-heart"></i>
-                        {% if is_favorite %}Удалить из избранного{% else %}Добавить в избранное{% endif %}
+                        {% if is_favorite %}Remove from Favorites{% else %}Add to Favorites{% endif %}
                     </button>
                     <a href="{% url 'home' %}" class="btn btn-outline">
-                        <i class="fas fa-arrow-left"></i> Назад
+                        <i class="fas fa-arrow-left"></i> Back
                     </a>
                 </div>
             </div>
@@ -37,27 +37,23 @@
         <div class="team-info-grid">
             <!-- Основная информация -->
             <div class="info-section">
-                <h2><i class="fas fa-info-circle"></i> Основная информация</h2>
+                <h2><i class="fas fa-info-circle"></i> Basic Information</h2>
                 <div class="info-card">
                     <div class="info-item">
-                        <span class="info-label">Название:</span>
+                        <span class="info-label">Name:</span>
                         <span class="info-value">{{ team.name }}</span>
                     </div>
                     <div class="info-item">
-                        <span class="info-label">Лига:</span>
+                        <span class="info-label">League:</span>
                         <span class="info-value">{{ team.league }}</span>
                     </div>
                     <div class="info-item">
-                        <span class="info-label">Страна:</span>
+                        <span class="info-label">Country:</span>
                         <span class="info-value">{{ team.country }}</span>
                     </div>
                     <div class="info-item">
-                        <span class="info-label">Год основания:</span>
+                        <span class="info-label">Founded:</span>
                         <span class="info-value">{{ team.founded }}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Возраст клуба:</span>
-                        <span class="info-value">{{ team.founded|add:"-2025"|add:"-1"|abs }} лет</span>
                     </div>
                 </div>
             </div>

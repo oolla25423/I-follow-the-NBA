@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Спортивные Фанаты{% endblock %}</title>
+    <title>{% block title %}Basketball Fans{% endblock %}</title>
     
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
@@ -34,24 +34,19 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-brand">
-                <i class="fas fa-futbol"></i>
-                <span>Спортивные Фанаты</span>
+                <i class="fas fa-basketball-ball"></i>
+                <span>Basketball Fans</span>
             </div>
             
             <ul class="nav-menu">
                 <li class="nav-item">
                     <a href="{% url 'home' %}" class="nav-link">
-                        <i class="fas fa-home"></i> Главная
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{% url 'leagues' %}" class="nav-link">
-                        <i class="fas fa-trophy"></i> Лиги
+                        <i class="fas fa-home"></i> Home
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="{% url 'preferences' %}" class="nav-link">
-                        <i class="fas fa-cog"></i> Настройки
+                        <i class="fas fa-cog"></i> Settings
                     </a>
                 </li>
             </ul>
@@ -80,7 +75,7 @@
 
     <footer class="footer">
         <div class="footer-content">
-            <p>&copy; 2025 Спортивные Фанаты. Все права защищены.</p>
+            <p>&copy; 2025 Basketball Fans. All rights reserved.</p>
             <div class="footer-links">
                 <a href="#"><i class="fab fa-facebook"></i></a>
                 <a href="#"><i class="fab fa-twitter"></i></a>
