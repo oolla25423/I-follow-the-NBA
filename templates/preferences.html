@@ -45,18 +45,18 @@
             
             <div class="selection-controls">
                 <button type="button" class="btn btn-outline" onclick="selectAllTeams()">
-                    <i class="fas fa-check-double"></i> Выбрать все
+                    <i class="fas fa-check-double"></i> Select All
                 </button>
                 <button type="button" class="btn btn-outline" onclick="clearAllTeams()">
-                    <i class="fas fa-times"></i> Очистить все
+                    <i class="fas fa-times"></i> Clear All
                 </button>
             </div>
         </div>
 
         <!-- Секция настройки языка -->
         <div class="form-section">
-            <h2><i class="fas fa-globe"></i> Язык интерфейса</h2>
-            <p class="section-description">Выберите предпочитаемый язык</p>
+            <h2><i class="fas fa-globe"></i> Interface Language</h2>
+            <p class="section-description">Choose your preferred language</p>
             
             <div class="language-selection">
                 {% for lang_code, lang_name in language_choices %}
@@ -69,9 +69,7 @@
                     <label for="lang-{{ lang_code }}" class="radio-label">
                         <div class="language-option">
                             <span class="language-flag">
-                                {% if lang_code == 'en' %}🇺🇸{% elif lang_code == 'es' %}🇪🇸
-                                {% elif lang_code == 'fr' %}🇫🇷{% elif lang_code == 'de' %}🇩🇪
-                                {% elif lang_code == 'it' %}🇮🇹{% elif lang_code == 'ru' %}🇷🇺{% endif %}
+                                {% if lang_code == 'en' %}🇺🇸{% elif lang_code == 'ru' %}🇷🇺{% endif %}
                             </span>
                             <span class="language-name">{{ lang_name }}</span>
                         </div>
@@ -83,8 +81,8 @@
 
         <!-- Секция выбора темы -->
         <div class="form-section">
-            <h2><i class="fas fa-palette"></i> Тема оформления</h2>
-            <p class="section-description">Выберите цветовую схему сайта</p>
+            <h2><i class="fas fa-palette"></i> Design Theme</h2>
+            <p class="section-description">Choose the site color scheme</p>
             
             <div class="theme-selection">
                 {% for theme_code, theme_name in theme_choices %}
@@ -109,71 +107,40 @@
             </div>
         </div>
 
-        <!-- Дополнительные настройки -->
-        <div class="form-section">
-            <h2><i class="fas fa-sliders-h"></i> Дополнительные настройки</h2>
-            
-            <div class="additional-settings">
-                <div class="setting-item">
-                    <input type="checkbox" id="notifications" name="notifications" checked>
-                    <label for="notifications">
-                        <i class="fas fa-bell"></i>
-                        Получать уведомления о результатах матчей
-                    </label>
-                </div>
-                
-                <div class="setting-item">
-                    <input type="checkbox" id="newsletter" name="newsletter">
-                    <label for="newsletter">
-                        <i class="fas fa-envelope"></i>
-                        Подписаться на спортивную рассылку
-                    </label>
-                </div>
-                
-                <div class="setting-item">
-                    <input type="checkbox" id="auto-save" name="auto-save" checked>
-                    <label for="auto-save">
-                        <i class="fas fa-save"></i>
-                        Автоматически сохранять настройки
-                    </label>
-                </div>
-            </div>
-        </div>
-
-        <!-- Кнопки действий -->
+        <!-- Action buttons -->
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">
-                <i class="fas fa-save"></i> Сохранить настройки
+                <i class="fas fa-save"></i> Save Settings
             </button>
             <a href="{% url 'home' %}" class="btn btn-outline">
-                <i class="fas fa-arrow-left"></i> Назад
+                <i class="fas fa-arrow-left"></i> Back
             </a>
             <button type="button" class="btn btn-danger" onclick="resetSettings()">
-                <i class="fas fa-undo"></i> Сбросить
+                <i class="fas fa-undo"></i> Reset
             </button>
         </div>
     </form>
 
-    <!-- Информация о текущих настройках -->
+    <!-- Current settings information -->
     <div class="current-settings">
-        <h3><i class="fas fa-info-circle"></i> Текущие настройки</h3>
+        <h3><i class="fas fa-info-circle"></i> Current Settings</h3>
         <div class="settings-info">
-            <p><strong>Любимых команд:</strong> {{ favorite_team_ids|length }}</p>
-            <p><strong>Язык:</strong> 
+            <p><strong>Favorite Teams:</strong> {{ favorite_team_ids|length }}</p>
+            <p><strong>Language:</strong> 
                 {% for lang_code, lang_name in language_choices %}
                     {% if lang_code == current_language %}{{ lang_name }}{% endif %}
                 {% endfor %}
             </p>
-            <p><strong>Тема:</strong> 
+            <p><strong>Theme:</strong> 
                 {% for theme_code, theme_name in theme_choices %}
                     {% if theme_code == current_theme %}{{ theme_name }}{% endif %}
                 {% endfor %}
             </p>
-            <p><strong>Последнее посещение:</strong> 
+            <p><strong>Last Visit:</strong> 
                 {% if request.COOKIES.last_visited %}
                     {{ request.COOKIES.last_visited }}
                 {% else %}
-                    Первое посещение
+                    First visit
                 {% endif %}
             </p>
         </div>
@@ -198,20 +165,16 @@ function clearAllTeams() {
 }
 
 function resetSettings() {
-    if (confirm('Вы уверены, что хотите сбросить все настройки?')) {
-        // Очищаем все чекбоксы любимых команд
+    if (confirm('Are you sure you want to reset all settings?')) {
+        // Clear all team checkboxes
         clearAllTeams();
         
-        // Сбрасываем язык на русский
-        document.getElementById('lang-ru').checked = true;
+        // Reset language to English
+        document.getElementById('lang-en').checked = true;
         
-        // Сбрасываем тему на светлую
+        // Reset theme to light
         document.getElementById('theme-light').checked = true;
-        
-        // Сбрасываем дополнительные настройки
-        document.getElementById('notifications').checked = true;
-        document.getElementById('newsletter').checked = false;
-        document.getElementById('auto-save').checked = true;
+        ThemeManager.setTheme('light');
     }
 }
 

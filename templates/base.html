@@ -56,10 +56,6 @@
                     <span class="language-indicator">
                         <i class="fas fa-globe"></i>
                         {% if request.COOKIES.language == 'en' %}English
-                        {% elif request.COOKIES.language == 'es' %}Español
-                        {% elif request.COOKIES.language == 'fr' %}Français
-                        {% elif request.COOKIES.language == 'de' %}Deutsch
-                        {% elif request.COOKIES.language == 'it' %}Italiano
                         {% elif request.COOKIES.language == 'ru' %}Русский
                         {% else %}English{% endif %}
                     </span>

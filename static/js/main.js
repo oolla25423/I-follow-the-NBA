@@ -173,8 +173,8 @@ const FormHandler = {
         if (confirm('Вы уверены, что хотите сбросить все настройки?')) {
             this.clearAllTeams();
             
-            const russianLang = document.getElementById('lang-ru');
-            if (russianLang) russianLang.checked = true;
+            const englishLang = document.getElementById('lang-en');
+            if (englishLang) englishLang.checked = true;
             
             const lightTheme = document.getElementById('theme-light');
             if (lightTheme) {

@@ -52,10 +52,6 @@ TEAMS_DATA = [
 # Language options for user preferences
 LANGUAGE_CHOICES = [
     ('en', 'English'),
-    ('es', 'Español'),
-    ('fr', 'Français'),
-    ('de', 'Deutsch'),
-    ('it', 'Italiano'),
     ('ru', 'Русский'),
 ]
 
