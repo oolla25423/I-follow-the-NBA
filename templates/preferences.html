@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Настройки - Спортивные Фанаты{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="preferences-header">
+        <h1><i class="fas fa-cog"></i> Настройки пользователя</h1>
+        <p>Настройте свои предпочтения для лучшего опыта использования</p>
+    </div>
+
+    <form method="post" class="preferences-form">
+        {% csrf_token %}
+        
+        <!-- Секция выбора любимых команд -->
+        <div class="form-section">
+            <h2><i class="fas fa-heart"></i> Любимые команды</h2>
+            <p class="section-description">Выберите команды, за которыми хотите следить</p>
+            
+            <div class="teams-selection">
+                {% for team in all_teams %}
+                <div class="team-checkbox">
+                    <input type="checkbox" 
+                           id="team-{{ team.id }}" 
+                           name="favorite_teams" 
+                           value="{{ team.id }}"
+                           {% if team.id|stringformat:'s' in favorite_team_ids %}checked{% endif %}>
+                    <label for="team-{{ team.id }}" class="team-label">
+                        <div class="team-card-mini">
+                            <img src="{% static 'images/teams/' %}{{ team.logo }}" 
+                                 alt="{{ team.name }}" 
+                                 class="team-logo-small"
+                                 onerror="this.src='{% static 'images/default-team.png' %}'">
+                            <div class="team-info-mini">
+                                <strong>{{ team.name }}</strong>
+                                <span class="team-league-mini">{{ team.league }}</span>
+                                <span class="team-country-mini">{{ team.country }}</span>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="selection-controls">
+                <button type="button" class="btn btn-outline" onclick="selectAllTeams()">
+                    <i class="fas fa-check-double"></i> Выбрать все
+                </button>
+                <button type="button" class="btn btn-outline" onclick="clearAllTeams()">
+                    <i class="fas fa-times"></i> Очистить все
+                </button>
+            </div>
+        </div>
+
+        <!-- Секция настройки языка -->
+        <div class="form-section">
+            <h2><i class="fas fa-globe"></i> Язык интерфейса</h2>
+            <p class="section-description">Выберите предпочитаемый язык</p>
+            
+            <div class="language-selection">
+                {% for lang_code, lang_name in language_choices %}
+                <div class="radio-option">
+                    <input type="radio" 
+                           id="lang-{{ lang_code }}" 
+                           name="language" 
+                           value="{{ lang_code }}"
+                           {% if lang_code == current_language %}checked{% endif %}>
+                    <label for="lang-{{ lang_code }}" class="radio-label">
+                        <div class="language-option">
+                            <span class="language-flag">
+                                {% if lang_code == 'en' %}🇺🇸{% elif lang_code == 'es' %}🇪🇸
+                                {% elif lang_code == 'fr' %}🇫🇷{% elif lang_code == 'de' %}🇩🇪
+                                {% elif lang_code == 'it' %}🇮🇹{% elif lang_code == 'ru' %}🇷🇺{% endif %}
+                            </span>
+                            <span class="language-name">{{ lang_name }}</span>
+                        </div>
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Секция выбора темы -->
+        <div class="form-section">
+            <h2><i class="fas fa-palette"></i> Тема оформления</h2>
+            <p class="section-description">Выберите цветовую схему сайта</p>
+            
+            <div class="theme-selection">
+                {% for theme_code, theme_name in theme_choices %}
+                <div class="radio-option">
+                    <input type="radio" 
+                           id="theme-{{ theme_code }}" 
+                           name="theme" 
+                           value="{{ theme_code }}"
+                           {% if theme_code == current_theme %}checked{% endif %}>
+                    <label for="theme-{{ theme_code }}" class="radio-label">
+                        <div class="theme-option" data-theme="{{ theme_code }}">
+                            <div class="theme-preview">
+                                <div class="theme-color theme-primary"></div>
+                                <div class="theme-color theme-secondary"></div>
+                                <div class="theme-color theme-background"></div>
+                            </div>
+                            <span class="theme-name">{{ theme_name }}</span>
+                        </div>
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Дополнительные настройки -->
+        <div class="form-section">
+            <h2><i class="fas fa-sliders-h"></i> Дополнительные настройки</h2>
+            
+            <div class="additional-settings">
+                <div class="setting-item">
+                    <input type="checkbox" id="notifications" name="notifications" checked>
+                    <label for="notifications">
+                        <i class="fas fa-bell"></i>
+                        Получать уведомления о результатах матчей
+                    </label>
+                </div>
+                
+                <div class="setting-item">
+                    <input type="checkbox" id="newsletter" name="newsletter">
+                    <label for="newsletter">
+                        <i class="fas fa-envelope"></i>
+                        Подписаться на спортивную рассылку
+                    </label>
+                </div>
+                
+                <div class="setting-item">
+                    <input type="checkbox" id="auto-save" name="auto-save" checked>
+                    <label for="auto-save">
+                        <i class="fas fa-save"></i>
+                        Автоматически сохранять настройки
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Кнопки действий -->
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Сохранить настройки
+            </button>
+            <a href="{% url 'home' %}" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Назад
+            </a>
+            <button type="button" class="btn btn-danger" onclick="resetSettings()">
+                <i class="fas fa-undo"></i> Сбросить
+            </button>
+        </div>
+    </form>
+
+    <!-- Информация о текущих настройках -->
+    <div class="current-settings">
+        <h3><i class="fas fa-info-circle"></i> Текущие настройки</h3>
+        <div class="settings-info">
+            <p><strong>Любимых команд:</strong> {{ favorite_team_ids|length }}</p>
+            <p><strong>Язык:</strong> 
+                {% for lang_code, lang_name in language_choices %}
+                    {% if lang_code == current_language %}{{ lang_name }}{% endif %}
+                {% endfor %}
+            </p>
+            <p><strong>Тема:</strong> 
+                {% for theme_code, theme_name in theme_choices %}
+                    {% if theme_code == current_theme %}{{ theme_name }}{% endif %}
+                {% endfor %}
+            </p>
+            <p><strong>Последнее посещение:</strong> 
+                {% if request.COOKIES.last_visited %}
+                    {{ request.COOKIES.last_visited }}
+                {% else %}
+                    Первое посещение
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function selectAllTeams() {
+    const checkboxes = document.querySelectorAll('input[name="favorite_teams"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = true;
+    });
+}
+
+function clearAllTeams() {
+    const checkboxes = document.querySelectorAll('input[name="favorite_teams"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+    });
+}
+
+function resetSettings() {
+    if (confirm('Вы уверены, что хотите сбросить все настройки?')) {
+        // Очищаем все чекбоксы любимых команд
+        clearAllTeams();
+        
+        // Сбрасываем язык на русский
+        document.getElementById('lang-ru').checked = true;
+        
+        // Сбрасываем тему на светлую
+        document.getElementById('theme-light').checked = true;
+        
+        // Сбрасываем дополнительные настройки
+        document.getElementById('notifications').checked = true;
+        document.getElementById('newsletter').checked = false;
+        document.getElementById('auto-save').checked = true;
+    }
+}
+
+// Предварительный просмотр темы
+document.querySelectorAll('input[name="theme"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        if (this.checked) {
+            document.body.setAttribute('data-theme', this.value);
+        }
+    });
+});
+
+// Анимация при выборе команд
+document.querySelectorAll('.team-checkbox input').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        const label = this.nextElementSibling;
+        if (this.checked) {
+            label.classList.add('selected');
+        } else {
+            label.classList.remove('selected');
+        }
+    });
+});
+
+// Инициализация выбранных команд при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.team-checkbox input:checked').forEach(checkbox => {
+        checkbox.nextElementSibling.classList.add('selected');
+    });
+});
+</script>
+{% endblock %}

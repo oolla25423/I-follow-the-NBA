@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Главная - Спортивные Фанаты{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="hero-content">
+        <h1><i class="fas fa-futbol"></i> Добро пожаловать в мир спорта!</h1>
+        <p>Настройте свои любимые команды и следите за результатами</p>
+        
+        {% if not favorite_teams %}
+            <div class="cta-buttons">
+                <a href="{% url 'preferences' %}" class="btn btn-primary">
+                    <i class="fas fa-heart"></i> Выберите любимые команды
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if favorite_teams %}
+<section class="favorite-teams-section">
+    <div class="container">
+        <h2><i class="fas fa-star"></i> Ваши любимые команды</h2>
+        <div class="teams-grid">
+            {% for team in favorite_teams %}
+            <div class="team-card favorite">
+                <div class="team-logo">
+                    <img src="{% static 'images/default-team.svg' %}" alt="{{ team.name }}">
+                </div>
+                <div class="team-info">
+                    <h3>{{ team.name }}</h3>
+                    <p class="team-league">{{ team.league }}</p>
+                    <p class="team-country">
+                        <i class="fas fa-map-marker-alt"></i> {{ team.country }}
+                    </p>
+                    <p class="team-founded">Основан: {{ team.founded }}</p>
+                </div>
+                <div class="team-actions">
+                    <a href="{% url 'team_detail' team.id %}" class="btn btn-sm btn-outline">
+                        <i class="fas fa-info-circle"></i> Подробнее
+                    </a>
+                    <button class="btn btn-sm btn-danger" onclick="toggleFavorite({{ team.id }})">
+                        <i class="fas fa-heart"></i>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="section-actions">
+            <a href="{% url 'preferences' %}" class="btn btn-outline">
+                <i class="fas fa-edit"></i> Изменить настройки
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="all-teams-section">
+    <div class="container">
+        <h2><i class="fas fa-list"></i> Все команды</h2>
+        
+        <!-- Фильтр по лигам -->
+        <div class="filter-section">
+            <div class="filter-buttons">
+                <button class="filter-btn active" onclick="filterTeams('all')">Все</button>
+                {% for league in leagues %}
+                <button class="filter-btn" onclick="filterTeams('{{ league }}')">{{ league }}</button>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="teams-grid" id="teams-grid">
+            {% for team in all_teams %}
+            <div class="team-card" data-league="{{ team.league }}">
+                <div class="team-logo">
+                    <img src="{% static 'images/default-team.svg' %}" alt="{{ team.name }}">
+                </div>
+                <div class="team-info">
+                    <h3>{{ team.name }}</h3>
+                    <p class="team-league">{{ team.league }}</p>
+                    <p class="team-country">
+                        <i class="fas fa-map-marker-alt"></i> {{ team.country }}
+                    </p>
+                </div>
+                <div class="team-actions">
+                    <a href="{% url 'team_detail' team.id %}" class="btn btn-sm btn-outline">
+                        <i class="fas fa-info-circle"></i> Подробнее
+                    </a>
+                    <button class="btn btn-sm {% if team.id|stringformat:'s' in favorite_team_ids %}btn-danger{% else %}btn-outline{% endif %}" 
+                            onclick="toggleFavorite({{ team.id }})" 
+                            id="favorite-btn-{{ team.id }}">
+                        <i class="fas fa-heart"></i>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="stats-section">
+    <div class="container">
+        <h2><i class="fas fa-chart-bar"></i> Статистика</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ all_teams|length }}</h3>
+                    <p>Команд в базе</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ leagues|length }}</h3>
+                    <p>Лиг</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ favorite_teams|length }}</h3>
+                    <p>Любимых команд</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function filterTeams(league) {
+    const teamCards = document.querySelectorAll('#teams-grid .team-card');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    
+    // Обновляем активную кнопку
+    filterButtons.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    // Фильтруем команды
+    teamCards.forEach(card => {
+        if (league === 'all' || card.dataset.league === league) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+function toggleFavorite(teamId) {
+    fetch('{% url "toggle_favorite" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            team_id: teamId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const btn = document.getElementById(`favorite-btn-${teamId}`);
+            if (data.is_favorite) {
+                btn.classList.remove('btn-outline');
+                btn.classList.add('btn-danger');
+            } else {
+                btn.classList.remove('btn-danger');
+                btn.classList.add('btn-outline');
+            }
+            
+            // Показываем уведомление
+            showNotification(data.message, data.is_favorite ? 'success' : 'info');
+            
+            // Обновляем страницу через некоторое время, чтобы обновить список избранных
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            showNotification('Ошибка при обновлении избранного', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Произошла ошибка', 'error');
+    });
+}
+
+function showNotification(message, type) {
+    // Создаем элемент уведомления
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    
+    // Добавляем стили
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 5px;
+        color: white;
+        font-weight: bold;
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    `;
+    
+    if (type === 'success') notification.style.backgroundColor = '#4CAF50';
+    else if (type === 'error') notification.style.backgroundColor = '#f44336';
+    else notification.style.backgroundColor = '#2196F3';
+    
+    document.body.appendChild(notification);
+    
+    // Показываем уведомление
+    setTimeout(() => notification.style.opacity = '1', 100);
+    
+    // Скрываем через 3 секунды
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+}
+</script>
+{% endblock %}

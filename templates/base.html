@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="{% if request.COOKIES.language %}{{ request.COOKIES.language }}{% else %}ru{% endif %}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Спортивные Фанаты{% endblock %}</title>
+    
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Применяем тему из cookies -->
+    <script>
+        const theme = getCookie('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</head>
+<body data-theme="{% if request.COOKIES.theme %}{{ request.COOKIES.theme }}{% else %}light{% endif %}">
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-futbol"></i>
+                <span>Спортивные Фанаты</span>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="{% url 'home' %}" class="nav-link">
+                        <i class="fas fa-home"></i> Главная
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'leagues' %}" class="nav-link">
+                        <i class="fas fa-trophy"></i> Лиги
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'preferences' %}" class="nav-link">
+                        <i class="fas fa-cog"></i> Настройки
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="nav-info">
+                {% if request.COOKIES.language %}
+                    <span class="language-indicator">
+                        <i class="fas fa-globe"></i>
+                        {% if request.COOKIES.language == 'en' %}English
+                        {% elif request.COOKIES.language == 'es' %}Español
+                        {% elif request.COOKIES.language == 'fr' %}Français
+                        {% elif request.COOKIES.language == 'de' %}Deutsch
+                        {% elif request.COOKIES.language == 'it' %}Italiano
+                        {% elif request.COOKIES.language == 'ru' %}Русский
+                        {% else %}English{% endif %}
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 Спортивные Фанаты. Все права защищены.</p>
+            <div class="footer-links">
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
