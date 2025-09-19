@@ -1,84 +1,131 @@
 from django.db import models
 
-# Hardcoded basketball team data
-TEAMS_DATA = [
-    {
+TEAMS_DATA = {
+    1: {
         'id': 1,
         'name': 'Los Angeles Lakers',
-        'league': 'NBA',
-        'country': 'USA',
-        'logo': 'lakers.png',
+        'city': 'Los Angeles',
+        'conference': 'Western',
+        'division': 'Pacific',
         'founded': 1947,
-        'description': 'One of the most successful franchises in NBA history.'
+        'championships': 17,
+        'description': 'One of the most successful franchises in NBA history, known for their purple and gold colors.',
+        'colors': ['#552583', '#FDB927']
     },
-    {
+    2: {
         'id': 2,
         'name': 'Boston Celtics',
-        'league': 'NBA',
-        'country': 'USA',
-        'logo': 'celtics.png',
+        'city': 'Boston',
+        'conference': 'Eastern',
+        'division': 'Atlantic',
         'founded': 1946,
-        'description': 'Historic franchise with the most NBA championships.'
+        'championships': 18,
+        'description': 'Historic franchise with the most NBA championships, known for their green and white colors.',
+        'colors': ['#007A33', '#BA9653']
     },
-    {
+    3: {
         'id': 3,
         'name': 'Golden State Warriors',
-        'league': 'NBA',
-        'country': 'USA',
-        'logo': 'warriors.png',
+        'city': 'San Francisco',
+        'conference': 'Western',
+        'division': 'Pacific',
         'founded': 1946,
-        'description': 'Known for their revolutionary three-point shooting style.'
+        'championships': 7,
+        'description': 'Known for their fast-paced style and three-point shooting excellence.',
+        'colors': ['#1D428A', '#FFC72C']
     },
-    {
+    4: {
         'id': 4,
         'name': 'Chicago Bulls',
-        'league': 'NBA',
-        'country': 'USA',
-        'logo': 'bulls.png',
+        'city': 'Chicago',
+        'conference': 'Eastern',
+        'division': 'Central',
         'founded': 1966,
-        'description': 'Famous for the Michael Jordan era and six championships.'
+        'championships': 6,
+        'description': 'Famous for the Michael Jordan era and six championships in the 1990s.',
+        'colors': ['#CE1141', '#000000']
     },
-    {
+    5: {
         'id': 5,
         'name': 'Miami Heat',
-        'league': 'NBA',
-        'country': 'USA',
-        'logo': 'heat.png',
+        'city': 'Miami',
+        'conference': 'Eastern',
+        'division': 'Southeast',
         'founded': 1988,
-        'description': 'Known for their strong team culture and recent success.'
+        'championships': 3,
+        'description': 'Known for their "Heat Culture" and multiple championship runs.',
+        'colors': ['#98002E', '#F9A01B']
+    },
+    6: {
+        'id': 6,
+        'name': 'Brooklyn Nets',
+        'city': 'Brooklyn',
+        'conference': 'Eastern',
+        'division': 'Atlantic',
+        'founded': 1967,
+        'championships': 2,
+        'description': 'Modern franchise known for star-studded rosters and distinctive black uniforms.',
+        'colors': ['#000000', '#FFFFFF']
+    },
+    7: {
+        'id': 7,
+        'name': 'Milwaukee Bucks',
+        'city': 'Milwaukee',
+        'conference': 'Eastern',
+        'division': 'Central',
+        'founded': 1968,
+        'championships': 2,
+        'description': 'Known for their passionate fanbase and recent championship success with Giannis Antetokounmpo.',
+        'colors': ['#00471B', '#EEE1C6']
+    },
+    8: {
+        'id': 8,
+        'name': 'Phoenix Suns',
+        'city': 'Phoenix',
+        'conference': 'Western',
+        'division': 'Pacific',
+        'founded': 1968,
+        'championships': 0,
+        'description': 'Known for their orange and purple colors and fast-paced "Seven Seconds or Less" style of play.',
+        'colors': ['#1D1160', '#E56020']
+    },
+    9: {
+        'id': 9,
+        'name': 'Dallas Mavericks',
+        'city': 'Dallas',
+        'conference': 'Western',
+        'division': 'Southwest',
+        'founded': 1980,
+        'championships': 1,
+        'description': 'Known for their unique style and championship run led by Dirk Nowitzki.',
+        'colors': ['#00538C', '#002B5E']
+    },
+    10: {
+        'id': 10,
+        'name': 'Denver Nuggets',
+        'city': 'Denver',
+        'conference': 'Western',
+        'division': 'Northwest',
+        'founded': 1976,
+        'championships': 1,
+        'description': 'Known for their mountain-inspired identity and recent championship success with Nikola Jokić.',
+        'colors': ['#0E2240', '#FEC524']
     }
-]
+}
 
-# Language options for user preferences
 LANGUAGE_CHOICES = [
     ('en', 'English'),
     ('ru', 'Русский'),
 ]
 
-# Theme options for user preferences
 THEME_CHOICES = [
-    ('light', 'Light Theme'),
-    ('dark', 'Dark Theme'),
-    ('blue', 'Blue Theme'),
-    ('green', 'Green Theme'),
+    ('light', 'White'),
+    ('dark', 'Black'),
+    ('yellow', 'Yellow'),
 ]
 
-# Helper functions to work with team data
-def get_all_teams():
-    """Return all teams data"""
-    return TEAMS_DATA
-
 def get_team_by_id(team_id):
-    """Get team by ID"""
-    for team in TEAMS_DATA:
-        if team['id'] == int(team_id):
-            return team
-    return None
+    return TEAMS_DATA.get(team_id)
 
-def get_teams_by_league(league):
-    """Get teams by league"""
-    return [team for team in TEAMS_DATA if team['league'] == league]
-
-def get_leagues():
-    """Get all unique leagues"""
-    return list(set(team['league'] for team in TEAMS_DATA))
+def get_all_teams():
+    return list(TEAMS_DATA.values())

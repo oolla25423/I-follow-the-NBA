@@ -1,86 +1,82 @@
+{% load static %}
+{% load i18n_fallback %}
 <!DOCTYPE html>
-<html lang="{% if request.COOKIES.language %}{{ request.COOKIES.language }}{% else %}ru{% endif %}">
+<html lang="{{ current_language|default:'en' }}" data-theme="{{ current_theme|default:'light' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Basketball Fans{% endblock %}</title>
+    <title>{% block title %}{% trans "Basketball Fans" %}{% endblock %}</title>
     
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.png' %}">
     
-    <!-- Применяем тему из cookies -->
-    <script>
-        const theme = getCookie('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', theme);
-        
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}?v=1.4">
+    
+    {% block extra_css %}{% endblock %}
 </head>
-<body data-theme="{% if request.COOKIES.theme %}{{ request.COOKIES.theme }}{% else %}light{% endif %}">
+<body{% if request.resolver_match.url_name == 'home' %} class="home-page"{% endif %}>
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-brand">
-                <i class="fas fa-basketball-ball"></i>
-                <span>Basketball Fans</span>
+                <a href="{% url 'home' %}">
+                    <i class="fas fa-basketball-ball"></i>
+                    {% trans "I follow the NBA" %}
+                </a>
             </div>
             
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="{% url 'home' %}" class="nav-link">
-                        <i class="fas fa-home"></i> Home
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{% url 'preferences' %}" class="nav-link">
-                        <i class="fas fa-cog"></i> Settings
-                    </a>
-                </li>
-            </ul>
-            
-            <div class="nav-info">
-                {% if request.COOKIES.language %}
-                    <span class="language-indicator">
-                        <i class="fas fa-globe"></i>
-                        {% if request.COOKIES.language == 'en' %}English
-                        {% elif request.COOKIES.language == 'ru' %}Русский
-                        {% else %}English{% endif %}
-                    </span>
-                {% endif %}
+            <div class="nav-menu">
+                <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                    <i class="fas fa-home"></i>
+                    {% trans "Home" %}
+                </a>
+                <a href="{% url 'preferences' %}" class="nav-link {% if request.resolver_match.url_name == 'preferences' %}active{% endif %}">
+                    <i class="fas fa-cog"></i>
+                    {% trans "Preferences" %}
+                </a>
+                <div class="favorites-badge">
+                    <i class="fas fa-heart"></i>
+                    <span class="badge" id="favorites-count">{{ favorite_count|default:0 }}</span>
+                </div>
             </div>
         </div>
     </nav>
 
     <main class="main-content">
-        {% block content %}
-        {% endblock %}
+        {% block content %}{% endblock %}
     </main>
 
     <footer class="footer">
-        <div class="footer-content">
-            <p>&copy; 2025 Basketball Fans. All rights reserved.</p>
-            <div class="footer-links">
-                <a href="#"><i class="fab fa-facebook"></i></a>
-                <a href="#"><i class="fab fa-twitter"></i></a>
-                <a href="#"><i class="fab fa-instagram"></i></a>
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>{% trans "I follow the NBA" %}</h3>
+                    <p>{% trans "Your favorite NBA teams in one place." %}</p>
+                </div>
+                <div class="footer-section">
+                    <h4>{% trans "Quick Links" %}</h4>
+                    <ul>
+                        <li><a href="{% url 'home' %}">{% trans "Home" %}</a></li>
+                        <li><a href="{% url 'preferences' %}">{% trans "Preferences" %}</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>{% trans "Favorites" %}</h4>
+                    <p><span id="footer-favorites-count">{{ favorite_count|default:0 }}</span> {% trans "teams selected" %}</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 {% trans "I follow the NBA" %}. {% trans "Built with Django." %}</p>
             </div>
         </div>
     </footer>
 
     <script src="{% static 'js/main.js' %}"></script>
     {% block extra_js %}{% endblock %}
+    
+    <script>
+        window.csrfToken = '{{ csrf_token }}';
+    </script>
 </body>
 </html>

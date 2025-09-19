@@ -14,8 +14,7 @@
         
         <div class="team-hero">
             <div class="team-logo-large">
-                <div class="team-initials-large" data-color1="{{ team.colors.0 }}" data-color2="{{ team.colors.1|default:team.colors.0 }}">
-                    {{ team.name|slice:":2"|upper }}
+                <div class="team-initials-large" style="background: linear-gradient(135deg, {{ team.colors.0 }}, {{ team.colors.1|default:team.colors.0 }})">
                 </div>
             </div>
             
@@ -38,7 +37,7 @@
                 </div>
                 
                 <button class="btn-favorite {% if team.is_favorite %}active{% endif %}" 
-                        data-team-id="{{ team.id }}"
+                        onclick="toggleFavorite({{ team.id }})"
                         title="{% if team.is_favorite %}Remove from favorites{% else %}Add to favorites{% endif %}">
                     <i class="{% if team.is_favorite %}fas{% else %}far{% endif %} fa-heart"></i>
                     {% if team.is_favorite %}{% trans "Remove from Favorites" %}{% else %}{% trans "Add to Favorites" %}{% endif %}
@@ -91,13 +90,13 @@
                 <div class="colors-showcase">
                     {% for color in team.colors %}
                     <div class="color-display">
-                        <div class="color-circle" data-color="{{ color }}"></div>
+                        <div class="color-circle" style="background-color: {{ color }};"></div>
                         <div class="color-code">{{ color }}</div>
                     </div>
                     {% endfor %}
                 </div>
                 
-                <div class="color-preview" data-color1="{{ team.colors.0 }}" data-color2="{{ team.colors.1|default:team.colors.0 }}">
+                <div class="color-preview" style="background: linear-gradient(135deg, {{ team.colors.0 }}, {{ team.colors.1|default:team.colors.0 }});">
                     <div class="color-preview-text">
                         <h3>{{ team.name }}</h3>
                         <p>{% trans "Team Colors Preview" %}</p>
@@ -175,6 +174,7 @@
     </div>
 </div>
 
+<!-- Toast notification -->
 <div id="toast" class="toast">
     <div class="toast-content">
         <i class="toast-icon"></i>
@@ -185,34 +185,6 @@
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Apply team colors from data attributes
-    document.querySelectorAll('.team-initials-large[data-color1]').forEach(element => {
-        const color1 = element.dataset.color1;
-        const color2 = element.dataset.color2;
-        element.style.background = `linear-gradient(135deg, ${color1}, ${color2})`;
-    });
-    
-    document.querySelectorAll('.color-circle[data-color]').forEach(element => {
-        element.style.backgroundColor = element.dataset.color;
-    });
-    
-    document.querySelectorAll('.color-preview[data-color1]').forEach(element => {
-        const color1 = element.dataset.color1;
-        const color2 = element.dataset.color2;
-        element.style.background = `linear-gradient(135deg, ${color1}, ${color2})`;
-    });
-    
-    // Add click event listener for favorite button
-    const favoriteBtn = document.querySelector('.btn-favorite');
-    if (favoriteBtn) {
-        favoriteBtn.addEventListener('click', function() {
-            const teamId = parseInt(this.dataset.teamId);
-            toggleFavorite(teamId);
-        });
-    }
-});
-
 function toggleFavorite(teamId) {
     fetch('{% url "toggle_favorite" %}', {
         method: 'POST',

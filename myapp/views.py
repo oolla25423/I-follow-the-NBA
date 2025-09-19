@@ -1,131 +1,183 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import (
-    get_all_teams, get_team_by_id,
-    LANGUAGE_CHOICES, THEME_CHOICES
-)
 import json
+from .models import get_all_teams, get_team_by_id, LANGUAGE_CHOICES, THEME_CHOICES
+from .forms import SearchForm
+
+
 
 def home(request):
-    """Главная страница"""
-    # Получаем предпочтения пользователя из cookies
-    favorite_team_ids = request.COOKIES.get('favorite_teams', '')
-    language = request.COOKIES.get('language', 'en')
-    theme = request.COOKIES.get('theme', 'light')
+    if request.method == 'POST':
+        form = SearchForm(request.POST)
+        if form.is_valid():
+            search_term = form.cleaned_data['search']
+            teams = get_all_teams()
+            teams = [team for team in teams if search_term.lower() in team['name'].lower()]
+            return render(request, 'home.html', {'teams': teams})
+
+    teams = get_all_teams()
     
-    # Получаем избранные команды
-    favorite_teams = []
-    if favorite_team_ids:
-        team_ids = favorite_team_ids.split(',')
-        for team_id in team_ids:
-            if team_id.strip():
-                team = get_team_by_id(team_id.strip())
-                if team:
-                    favorite_teams.append(team)
+    favorites = request.COOKIES.get('favorite_teams', '[]')
+    try:
+        favorite_list = json.loads(favorites)
+    except (json.JSONDecodeError, TypeError):
+        favorite_list = []
     
-    # Получаем все команды
-    all_teams = get_all_teams()
+    for team in teams:
+        team['is_favorite'] = team['id'] in favorite_list
     
     context = {
-        'favorite_teams': favorite_teams,
-        'all_teams': all_teams,
-        'current_language': language,
-        'current_theme': theme,
-        'language_choices': LANGUAGE_CHOICES,
-        'theme_choices': THEME_CHOICES,
+        'teams': teams,
+        'favorite_count': len(favorite_list)
     }
-    
     return render(request, 'home.html', context)
 
-def team_detail(request, team_id):
-    """Детальная страница команды"""
-    team = get_team_by_id(team_id)
-    if not team:
-        return redirect('home')
-    
-    # Проверяем, является ли команда избранной
-    favorite_team_ids = request.COOKIES.get('favorite_teams', '')
-    is_favorite = str(team_id) in favorite_team_ids.split(',')
-    
-    context = {
-        'team': team,
-        'is_favorite': is_favorite,
-    }
-    
-    return render(request, 'team_detail.html', context)
-
 def preferences(request):
-    """Страница настроек пользователя"""
     if request.method == 'POST':
-        # Получаем данные из формы
-        favorite_teams = request.POST.getlist('favorite_teams')
-        language = request.POST.get('language', 'en')
-        theme = request.POST.get('theme', 'light')
-        
-        # Создаем ответ с перенаправлением
         response = redirect('home')
         
-        # Устанавливаем cookies
-        response.set_cookie('favorite_teams', ','.join(favorite_teams), max_age=365*24*60*60)  # 1 год
-        response.set_cookie('language', language, max_age=365*24*60*60)
-        response.set_cookie('theme', theme, max_age=365*24*60*60)
+        language = request.POST.get('language')
+        if language and any(lang[0] == language for lang in LANGUAGE_CHOICES):
+            response.set_cookie('django_language', language, max_age=365*24*60*60, path='/')
         
-        # Сохраняем последнюю посещенную страницу
-        response.set_cookie('last_visited', 'preferences', max_age=30*24*60*60)  # 30 дней
+        theme = request.POST.get('theme')
+        if theme and any(t[0] == theme for t in THEME_CHOICES):
+            response.set_cookie('theme', theme, max_age=365*24*60*60, path='/')
         
         return response
     
-    # Получаем текущие предпочтения
-    favorite_team_ids = request.COOKIES.get('favorite_teams', '').split(',')
-    current_language = request.COOKIES.get('language', 'en')
-    current_theme = request.COOKIES.get('theme', 'light')
+    current_language = getattr(request, 'LANGUAGE_CODE', None)
+    if not current_language:
+        current_language = request.COOKIES.get('django_language', 'en')
+    current_theme = getattr(request, 'theme', request.COOKIES.get('theme', 'light'))
+    
+    favorites = request.COOKIES.get('favorite_teams', '[]')
+    try:
+        favorite_list = json.loads(favorites)
+    except (json.JSONDecodeError, TypeError):
+        favorite_list = []
     
     context = {
-        'all_teams': get_all_teams(),
-        'favorite_team_ids': [id.strip() for id in favorite_team_ids if id.strip()],
         'language_choices': LANGUAGE_CHOICES,
         'theme_choices': THEME_CHOICES,
         'current_language': current_language,
         'current_theme': current_theme,
+        'favorite_count': len(favorite_list)
     }
-    
     return render(request, 'preferences.html', context)
 
 @csrf_exempt
 def toggle_favorite(request):
-    """AJAX endpoint для добавления/удаления команды из избранного"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            team_id = str(data.get('team_id'))
+            team_id = data.get('team_id')
             
-            # Получаем текущие избранные команды
-            favorite_teams = request.COOKIES.get('favorite_teams', '')
-            team_ids = [id.strip() for id in favorite_teams.split(',') if id.strip()]
+            if not team_id:
+                return JsonResponse({'error': 'Team ID required'}, status=400)
             
-            # Переключаем статус избранного
-            if team_id in team_ids:
-                team_ids.remove(team_id)
+            favorites = request.COOKIES.get('favorite_teams', '[]')
+            try:
+                favorite_list = json.loads(favorites)
+            except (json.JSONDecodeError, TypeError):
+                favorite_list = []
+            
+            if team_id in favorite_list:
+                favorite_list.remove(team_id)
                 is_favorite = False
             else:
-                team_ids.append(team_id)
+                favorite_list.append(team_id)
                 is_favorite = True
             
             response = JsonResponse({
                 'success': True,
                 'is_favorite': is_favorite,
-                'message': 'Team added to favorites' if is_favorite else 'Team removed from favorites'
+                'favorite_count': len(favorite_list)
             })
             
-            # Обновляем cookie
-            response.set_cookie('favorite_teams', ','.join(team_ids), max_age=365*24*60*60)
+            response.set_cookie(
+                'favorite_teams', 
+                json.dumps(favorite_list), 
+                max_age=365*24*60*60,
+                path='/'
+            )
             
             return response
             
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
         except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
+            return JsonResponse({'error': str(e)}, status=500)
     
-    return JsonResponse({'success': False, 'error': 'Method not supported'})
+    return JsonResponse({'error': 'POST method required'}, status=405)
 
+@csrf_exempt
+def change_theme(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            theme = data.get('theme')
+            
+            if not theme:
+                return JsonResponse({'error': 'Theme required'}, status=400)
+            
+            if not any(t[0] == theme for t in THEME_CHOICES):
+                return JsonResponse({'error': 'Invalid theme'}, status=400)
+            
+            response = JsonResponse({
+                'success': True,
+                'theme': theme,
+                'message': 'Theme updated successfully'
+            })
+            
+            response.set_cookie(
+                'theme', 
+                theme, 
+                max_age=365*24*60*60,
+                path='/'
+            )
+            
+            return response
+            
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    return JsonResponse({'error': 'POST method required'}, status=405)
 
+@csrf_exempt
+def change_language(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            language = data.get('language')
+            
+            if not language:
+                return JsonResponse({'error': 'Language required'}, status=400)
+            
+            if not any(lang[0] == language for lang in LANGUAGE_CHOICES):
+                return JsonResponse({'error': 'Invalid language'}, status=400)
+            
+            response = JsonResponse({
+                'success': True,
+                'language': language,
+                'message': 'Language updated successfully'
+            })
+            
+            response.set_cookie(
+                'django_language', 
+                language, 
+                max_age=365*24*60*60,
+                path='/'
+            )
+            
+            return response
+            
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    return JsonResponse({'error': 'POST method required'}, status=405)

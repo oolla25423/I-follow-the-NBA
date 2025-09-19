@@ -1,196 +1,291 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n_fallback %}
 
-{% block title %}Home - Basketball Fans{% endblock %}
+{% block title %}{% trans "Home" %} - {% trans "I follow the NBA" %}{% endblock %}
 
 {% block content %}
-<div class="hero-section">
-    <div class="hero-content">
-        <h1><i class="fas fa-basketball-ball"></i> Welcome to Basketball World!</h1>
-        <p>Set up your favorite teams and follow the results</p>
-        
-        {% if not favorite_teams %}
-            <div class="cta-buttons">
-                <a href="{% url 'preferences' %}" class="btn btn-primary">
-                    <i class="fas fa-heart"></i> Choose Favorite Teams
-                </a>
-            </div>
-        {% endif %}
+<div class="nba-hero-fullwidth">
+    <div class="nba-hero-image">
+        <img src="{% static 'images/nba.jpeg' %}" alt="NBA Basketball" class="hero-img">
     </div>
 </div>
 
-{% if favorite_teams %}
-<section class="favorite-teams-section">
-    <div class="container">
-        <h2><i class="fas fa-star"></i> Your Favorite Teams</h2>
+<div class="container">
+    <section class="teams-section">
+        <div class="section-header">
+            <div class="filter-controls">
+                <button class="btn filter-btn active" data-filter="favorites">
+                    <i class="fas fa-heart"></i> {% trans "Favorites Only" %}
+                </button>
+                <button class="btn filter-btn" data-filter="all">
+                    <i class="fas fa-list"></i> {% trans "All Teams" %}
+                </button>
+            </div>
+            <p>{% trans "Click the heart icon to add teams to your favorites" %}</p>
+        </div>
+
+        <div class="search-bar" id="searchBar" style="display: none;">
+            <form method="get">
+                <input type="text" id="searchInput" name="search" placeholder="{% trans 'Search teams...' %}" />
+                <button type="submit" class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+
         <div class="teams-grid">
-            {% for team in favorite_teams %}
-            <div class="team-card favorite">
-                <div class="team-logo">
-                    <img src="{% static 'images/default-team.svg' %}" alt="{{ team.name }}">
+            {% for team in teams %}
+            <div class="team-card" data-team-id="{{ team.id }}">
+                <div class="team-header">
+                    <div class="team-logo">
+                        <div class="team-initials" data-color1="{{ team.colors.0 }}" data-color2="{{ team.colors.1|default:team.colors.0 }}">
+                        </div>
+                    </div>
+                    <button class="favorite-btn toggle-favorite-btn {% if team.is_favorite %}active{% endif %}" 
+                            data-team-id="{{ team.id }}"
+                            title="{% if team.is_favorite %}{% trans 'Remove from favorites' %}{% else %}{% trans 'Add to favorites' %}{% endif %}">
+                        <i class="{% if team.is_favorite %}fas{% else %}far{% endif %} fa-heart"></i>
+                    </button>
                 </div>
+                
                 <div class="team-info">
-                    <h3>{{ team.name }}</h3>
-                    <p class="team-league">{{ team.league }}</p>
-                    <p class="team-country">
-                        <i class="fas fa-map-marker-alt"></i> {{ team.country }}
-                    </p>
-                    <p class="team-founded">Founded: {{ team.founded }}</p>
-                </div>
-                <div class="team-actions">
-                    <a href="{% url 'team_detail' team.id %}" class="btn btn-sm btn-outline">
-                        <i class="fas fa-info-circle"></i> Details
-                    </a>
-                    <button class="btn btn-sm btn-danger" onclick="toggleFavorite({{ team.id }})">
-                        <i class="fas fa-heart"></i>
+                    <h3 class="team-name">{{ team.name }}</h3>
+                    <p class="team-city"><i class="fas fa-map-marker-alt"></i> {{ team.city }}</p>
+                    
+                    <div class="team-details">
+                        <div class="detail-item">
+                            <span class="detail-label">{% trans "Conference:" %}</span>
+                            <span class="detail-value">{{ team.conference }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">{% trans "Division:" %}</span>
+                            <span class="detail-value">{{ team.division }}</span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary team-info-btn" data-team-id="{{ team.id }}">
+                        <i class="fas fa-info-circle"></i>
+                        {% trans "Quick Info" %}
                     </button>
                 </div>
             </div>
-            {% endfor %}
-        </div>
-        
-        <div class="section-actions">
-            <a href="{% url 'preferences' %}" class="btn btn-outline">
-                <i class="fas fa-edit"></i> Change Settings
-            </a>
-        </div>
-    </div>
-</section>
-{% endif %}
-
-<section class="all-teams-section">
-    <div class="container">
-        <h2><i class="fas fa-list"></i> All Teams</h2>
-        
-        <div class="teams-grid" id="teams-grid">
-            {% for team in all_teams %}
-            <div class="team-card">
-                <div class="team-logo">
-                    <img src="{% static 'images/default-team.svg' %}" alt="{{ team.name }}">
-                </div>
-                <div class="team-info">
-                    <h3>{{ team.name }}</h3>
-                    <p class="team-league">{{ team.league }}</p>
-                    <p class="team-country">
-                        <i class="fas fa-map-marker-alt"></i> {{ team.country }}
-                    </p>
-                </div>
-                <div class="team-actions">
-                    <a href="{% url 'team_detail' team.id %}" class="btn btn-sm btn-outline">
-                        <i class="fas fa-info-circle"></i> Details
-                    </a>
-                    <button class="btn btn-sm {% if team.id|stringformat:'s' in favorite_team_ids %}btn-danger{% else %}btn-outline{% endif %}" 
-                            onclick="toggleFavorite({{ team.id }})" 
-                            id="favorite-btn-{{ team.id }}">
-                        <i class="fas fa-heart"></i>
-                    </button>
-                </div>
+            {% empty %}
+            <div class="no-teams">
+                <i class="fas fa-basketball-ball"></i>
+                <h3>{% trans "No teams available" %}</h3>
+                <p>{% trans "Please check back later for team information." %}</p>
             </div>
             {% endfor %}
         </div>
-    </div>
-</section>
+    </section>
+</div>
 
-<section class="stats-section">
-    <div class="container">
-        <h2><i class="fas fa-chart-bar"></i> Statistics</h2>
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="stat-info">
-                    <h3>{{ all_teams|length }}</h3>
-                    <p>Teams Available</p>
-                </div>
+<div id="teamModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="close" data-modal-close>&times;</span>
+            <h2 id="modalTeamName"></h2>
+        </div>
+        <div class="modal-body">
+            <div class="modal-team-logo">
+                <div id="modalTeamInitials" class="team-initials-modal"></div>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-heart"></i>
+            <div class="modal-team-info">
+                <p class="modal-team-location">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span id="modalTeamCity"></span>
+                </p>
+                <div class="modal-team-badges">
+                    <span id="modalConference" class="badge conference-badge"></span>
+                    <span id="modalDivision" class="badge division-badge"></span>
                 </div>
-                <div class="stat-info">
-                    <h3>{{ favorite_teams|length }}</h3>
-                    <p>Favorite Teams</p>
-                </div>
+                <p id="modalTeamDescription" class="team-description"></p>
             </div>
         </div>
     </div>
-</section>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-function toggleFavorite(teamId) {
-    fetch('{% url "toggle_favorite" %}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            team_id: teamId
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const btn = document.getElementById(`favorite-btn-${teamId}`);
-            if (data.is_favorite) {
-                btn.classList.remove('btn-outline');
-                btn.classList.add('btn-danger');
-            } else {
-                btn.classList.remove('btn-danger');
-                btn.classList.add('btn-outline');
+// Initialize favorites filter on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Apply team colors from data attributes
+    document.querySelectorAll('.team-initials[data-color1]').forEach(element => {
+        const color1 = element.dataset.color1;
+        const color2 = element.dataset.color2;
+        element.style.background = `linear-gradient(135deg, ${color1}, ${color2})`;
+    });
+    
+    // Add close modal handler
+    const closeBtn = document.querySelector('[data-modal-close]');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeTeamModal);
+    }
+    
+    // Add filter button handlers
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    console.log('Found filter buttons:', filterButtons.length);
+    filterButtons.forEach(btn => {
+        console.log('Adding click handler to button:', btn);
+        btn.addEventListener('click', function() {
+            const filter = this.dataset.filter;
+            console.log('Filter clicked:', filter);
+            if (window.filterTeams && typeof window.filterTeams === 'function') {
+                window.filterTeams(filter);
             }
             
-            showNotification(data.message, data.is_favorite ? 'success' : 'info');
-            
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
-        } else {
-            showNotification('Error updating favorites', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showNotification('An error occurred', 'error');
+            // Show search bar only for "all teams" filter
+            const searchBar = document.getElementById('searchBar');
+            if (searchBar) {
+                if (filter === 'all') {
+                    searchBar.style.display = 'block';
+                } else {
+                    searchBar.style.display = 'none';
+                    // Clear search when switching to favorites
+                    const searchInput = document.getElementById('searchInput');
+                    if (searchInput) {
+                        searchInput.value = '';
+                        // Trigger input event to clear search results
+                        searchInput.dispatchEvent(new Event('input'));
+                    }
+                }
+            }
+        });
     });
+    
+    // Add search functionality
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            const teams = document.querySelectorAll('.team-card');
+            
+            teams.forEach(team => {
+                const name = team.querySelector('.team-name').textContent.toLowerCase();
+                const city = team.querySelector('.team-city').textContent.toLowerCase();
+                
+                if (name.includes(query) || city.includes(query)) {
+                    team.style.display = 'block';
+                } else {
+                    team.style.display = 'none';
+                }
+            });
+        });
+    }
+    
+    // Initialize with favorites filter
+    setTimeout(() => {
+        if (window.filterTeams && typeof window.filterTeams === 'function') {
+            window.filterTeams('favorites');
+        }
+    }, 100);
+});
+
+// Local getCookie function
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
 }
 
-function showNotification(message, type) {
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    notification.textContent = message;
-    
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 20px;
-        border-radius: 5px;
-        color: white;
-        font-weight: bold;
-        z-index: 1000;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    `;
-    
-    if (type === 'success') notification.style.backgroundColor = '#4CAF50';
-    else if (type === 'error') notification.style.backgroundColor = '#f44336';
-    else notification.style.backgroundColor = '#2196F3';
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => notification.style.opacity = '1', 100);
-    
-    setTimeout(() => {
-        notification.style.opacity = '0';
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
-            }
-        }, 300);
-    }, 3000);
+// Show team info in modal
+function showTeamInfo(teamId) {
+    try {
+        // Find team data from the current page
+        const teamCard = document.querySelector(`[data-team-id="${teamId}"]`);
+        if (!teamCard) {
+            console.error('Team card not found for ID:', teamId);
+            return;
+        }
+        
+        const teamName = teamCard.querySelector('.team-name').textContent;
+        const teamCity = teamCard.querySelector('.team-city').textContent.replace('📍', '').trim();
+        const conferenceValue = teamCard.querySelector('.detail-item:first-child .detail-value').textContent;
+        const divisionValue = teamCard.querySelector('.detail-item:last-child .detail-value').textContent;
+        const teamInitials = teamCard.querySelector('.team-initials');
+        const teamColors = teamInitials.style.background;
+        
+        // Get current language first
+        const currentLang = getCookie('django_language') || 'en';
+        
+        // Set modal content
+        document.getElementById('modalTeamName').textContent = teamName;
+        document.getElementById('modalTeamCity').textContent = teamCity;
+        
+        // Set conference and division with proper language
+        if (currentLang === 'ru') {
+            document.getElementById('modalConference').textContent = conferenceValue + ' Конференция';
+            document.getElementById('modalDivision').textContent = divisionValue + ' Дивизион';
+        } else {
+            document.getElementById('modalConference').textContent = conferenceValue + ' Conference';
+            document.getElementById('modalDivision').textContent = divisionValue + ' Division';
+        }
+        document.getElementById('modalTeamInitials').textContent = '';
+        document.getElementById('modalTeamInitials').style.background = teamColors;
+        
+        // Set description based on language (simple 3-sentence description)
+        let description;
+        if (currentLang === 'ru') {
+            const descriptions = {
+                1: `${teamName} — это профессиональная баскетбольная команда из города ${teamCity}. Они выступают в ${conferenceValue} Конференции, ${divisionValue} Дивизион. Известны своим соревновательным духом и преданными болельщиками.`,
+                2: `Базируется в ${teamCity}, ${teamName} представляет ${divisionValue} Дивизион. Команда имеет богатую историю в профессиональном баскетболе. Они продолжают стремиться к совершенству в каждом сезоне.`,
+                3: `${teamName} называет ${teamCity} домом и играет в ${conferenceValue} Конференции. Эта франшиза создала прочную репутацию за эти годы. Их болельщики одни из самых страстных в баскетболе.`,
+                4: `Основанная в 1966 году, ${teamName} из ${teamCity} имеет богатую историю в НБА. Команда выступает в ${conferenceValue} Конференции, ${divisionValue} Дивизион. Известна своими шестью чемпионскими титулами и эпохой Майкла Джордана.`,
+                5: `${teamName} из ${teamCity} выступает в ${conferenceValue} Конференции, ${divisionValue} Дивизион. Команда известна своей "культурой Heat" и несколькими чемпионскими титулами. Основана в 1988 году и имеет преданную фанбазу.`,
+                6: `${teamName} из ${teamCity} выступает в ${conferenceValue} Конференции, ${divisionValue} Дивизион. Современная франшиза, известная звездными составами и характерной черной формой. Основана в 1967 году.`,
+                7: `Базируется в ${teamCity}, ${teamName} представляет ${divisionValue} Дивизион. Команда известна страстной фанбазой и недавним чемпионским успехом с Гианнисом Антетокумпо. Основана в 1968 году.`,
+                8: `${teamName} называет ${teamCity} домом и играет в ${conferenceValue} Конференции. Эта франшиза известна своими оранжевыми и фиолетовыми цветами и быстрым стилем игры "Семь секунд или меньше". Основана в 1968 году.`,
+                9: `${teamName} из ${teamCity} выступает в ${conferenceValue} Конференции, ${divisionValue} Дивизион. Команда известна своим уникальным стилем и чемпионским туром под руководством Дирка Новицки. Основана в 1980 году.`,
+                10: `Основанная в 1976 году, ${teamName} из ${teamCity} имеет горную идентичность и недавний чемпионский успех с Николой Йокичем. Команда выступает в ${conferenceValue} Конференции, ${divisionValue} Дивизион.`
+            };
+            description = descriptions[teamId] || descriptions[1];
+        } else {
+            const descriptions = {
+                1: `The ${teamName} is a professional basketball team based in ${teamCity}. They compete in the ${conferenceValue} Conference, ${divisionValue} Division. Known for their competitive spirit and dedicated fanbase.`,
+                2: `Based in ${teamCity}, the ${teamName} represents the ${divisionValue} Division. The team has a rich history in professional basketball. They continue to strive for excellence in every season.`,
+                3: `The ${teamName} calls ${teamCity} home and plays in the ${conferenceValue} Conference. This franchise has built a strong reputation over the years. Their fans are among the most passionate in basketball.`,
+                4: `Founded in 1966, the ${teamName} from ${teamCity} has a rich history in the NBA. The team competes in the ${conferenceValue} Conference, ${divisionValue} Division. Known for their six championship titles and the Michael Jordan era.`,
+                5: `The ${teamName} from ${teamCity} competes in the ${conferenceValue} Conference, ${divisionValue} Division. The team is known for their "Heat Culture" and multiple championship runs. Founded in 1988 with a dedicated fanbase.`,
+                6: `The ${teamName} from ${teamCity} competes in the ${conferenceValue} Conference, ${divisionValue} Division. A modern franchise known for star-studded rosters and distinctive black uniforms. Founded in 1967.`,
+                7: `Based in ${teamCity}, the ${teamName} represents the ${divisionValue} Division. Known for their passionate fanbase and recent championship success with Giannis Antetokounmpo. Founded in 1968.`,
+                8: `The ${teamName} calls ${teamCity} home and plays in the ${conferenceValue} Conference. This franchise is known for their orange and purple colors and fast-paced "Seven Seconds or Less" style of play. Founded in 1968.`,
+                9: `The ${teamName} from ${teamCity} competes in the ${conferenceValue} Conference, ${divisionValue} Division. Known for their unique style and championship run led by Dirk Nowitzki. Founded in 1980.`,
+                10: `Founded in 1976, the ${teamName} from ${teamCity} has a mountain-inspired identity and recent championship success with Nikola Jokić. The team competes in the ${conferenceValue} Conference, ${divisionValue} Division.`
+            };
+            description = descriptions[teamId] || descriptions[1];
+        }
+        
+        document.getElementById('modalTeamDescription').textContent = description;
+        
+        // Show modal
+        document.getElementById('teamModal').style.display = 'block';
+    } catch (error) {
+        console.error('Error showing team info:', error);
+        alert('Ошибка при загрузке информации о команде. Попробуйте еще раз.');
+    }
+}
+
+function closeTeamModal() {
+    document.getElementById('teamModal').style.display = 'none';
+}
+
+// Close modal when clicking outside of it
+window.onclick = function(event) {
+    const modal = document.getElementById('teamModal');
+    if (event.target === modal) {
+        closeTeamModal();
+    }
 }
 </script>
 {% endblock %}
