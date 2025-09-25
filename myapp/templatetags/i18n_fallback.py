@@ -2,8 +2,10 @@ from django import template
 from django.utils.safestring import mark_safe
 from django.utils import translation
 
+# Регистрация библиотеки шаблонных тегов
 register = template.Library()
 
+# Словарь переводов
 TRANSLATIONS = {
     'ru': {
         'Home': 'Главная',
@@ -44,6 +46,7 @@ TRANSLATIONS = {
         'Built with Django.': 'Создано с Django.',
         'Favorites Only': 'Только избранные',
         'All Teams': 'Все команды',
+        'Search teams...': 'Поиск команд...',
         'No teams available': 'Нет доступных команд',
         'Please check back later for team information.': 'Пожалуйста, проверьте позже для получения информации о командах.',
         'Back to Teams': 'Назад к командам',
@@ -62,7 +65,7 @@ TRANSLATIONS = {
         'Share Team': 'Поделиться командой',
         'View All Teams': 'Показать все команды',
         'Print Info': 'Печать информации',
-        # Modal and JavaScript specific translations
+
         'Close': 'Закрыть',
         'Team Info': 'Информация о команде',
         'is a professional basketball team based in': 'это профессиональная баскетбольная команда из города',
@@ -80,7 +83,6 @@ TRANSLATIONS = {
         'Their fans are among the most passionate in basketball.': 'Их болельщики одни из самых страстных в баскетболе.',
         'No favorite teams yet': 'Пока нет избранных команд',
         'Click the heart icon on any team to add it to your favorites.': 'Нажмите на иконку сердца у любой команды, чтобы добавить её в избранное.',
-        # Translations for new teams
         'Modern franchise known for star-studded rosters and distinctive black uniforms.': 'Современная франшиза, известная звездными составами и характерной черной формой.',
         'Known for their passionate fanbase and recent championship success with Giannis Antetokounmpo.': 'Известны страстной фанбазой и недавним чемпионским успехом с Гианнисом Антетокумпо.',
         'Known for their orange and purple colors and fast-paced "Seven Seconds or Less" style of play.': 'Известны своими оранжевыми и фиолетовыми цветами и быстрым стилем игры "Семь секунд или меньше".',
@@ -89,12 +91,14 @@ TRANSLATIONS = {
     }
 }
 
+# Шаблонный тег для перевода текста
 @register.simple_tag(takes_context=True)
 def trans(context, message):
     current_language = translation.get_language()
     lang_translations = TRANSLATIONS.get(current_language, {})
     return mark_safe(lang_translations.get(message, message))
 
+# Шаблонный тег для перевода текста с поддержкой множественного числа
 @register.simple_tag(takes_context=True)
 def blocktrans(context, message, count=None, **kwargs):
     current_language = translation.get_language()

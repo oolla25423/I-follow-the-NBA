@@ -1,5 +1,5 @@
 :root {
-    /* Light theme (default) */
+    /* Светлая тема (по умолчанию) */
     --primary-color: #d84315;
     --secondary-color: #757575;
     --accent-color: #e65100;
@@ -11,7 +11,7 @@
     --shadow: 0 2px 8px rgba(0,0,0,0.1);
     --shadow-hover: 0 4px 16px rgba(0,0,0,0.15);
     
-    /* Spacing */
+    /* Отступы */
     --spacing-xs: 0.25rem;
     --spacing-sm: 0.5rem;
     --spacing-md: 1rem;
@@ -19,11 +19,11 @@
     --spacing-xl: 2rem;
     --spacing-xxl: 3rem;
     
-    /* Border radius */
+    /* Радиус скругления */
     --border-radius: 8px;
     --border-radius-lg: 12px;
     
-    /* Fonts */
+    /* Шрифты */
     --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     --font-size-sm: 0.875rem;
     --font-size-base: 1rem;
@@ -32,10 +32,11 @@
     --font-size-2xl: 1.5rem;
     --font-size-3xl: 2rem;
     
-    /* Mobile viewport handling */
+    /* Обработка мобильной области просмотра */
     --vh: 1vh;
 }
 
+/* Темная тема */
 [data-theme="dark"] {
     --primary-color: #ff7043;
     --secondary-color: #9e9e9e;
@@ -49,6 +50,7 @@
     --shadow-hover: 0 4px 16px rgba(0,0,0,0.4);
 }
 
+/* Желтая тема */
 [data-theme="yellow"] {
     --primary-color: #f57f17;
     --secondary-color: #616161;
@@ -453,7 +455,7 @@ button.btn:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
     position: absolute;
     right: var(--spacing-lg);
     top: 50%;
@@ -519,19 +521,6 @@ button.btn:hover {
     line-height: 1.5;
     margin: 0;
     font-size: var(--font-size-sm);
-}
-
-@media (max-width: 768px) {
-    .modal-content {
-        width: 95%;
-        margin: 15% auto;
-    }
-    
-    .team-initials-modal {
-        width: 70px;
-        height: 35px;
-        font-size: 16px;
-    }
 }
 
 .section-header {
@@ -682,7 +671,7 @@ button.btn:hover {
     cursor: pointer;
     padding: var(--spacing-sm);
     border-radius: 50%;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .favorite-btn:hover {
@@ -828,6 +817,7 @@ button.btn:hover {
     background-color: var(--surface-color);
     padding: var(--spacing-lg);
     border-radius: var(--border-radius-lg);
+    margin-bottom: var(--spacing-lg);
     box-shadow: var(--shadow);
 }
 
@@ -1001,7 +991,7 @@ button.btn:hover {
     cursor: pointer;
     padding: var(--spacing-md);
     border-radius: var(--border-radius);
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .theme-label:hover {
@@ -1013,7 +1003,7 @@ button.btn:hover {
     height: 60px;
     border-radius: 50%;
     border: 3px solid var(--border-color);
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .theme-circle.theme-light {
@@ -1108,50 +1098,6 @@ button.btn:hover {
 
 .info-section li:last-child {
     border-bottom: none;
-}
-
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.modal-content {
-    background-color: var(--surface-color);
-    padding: var(--spacing-xl);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-hover);
-    max-width: 500px;
-    width: 90%;
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-lg);
-}
-
-.modal-close {
-    background: none;
-    border: none;
-    font-size: var(--font-size-2xl);
-    cursor: pointer;
-    color: var(--text-secondary);
-}
-
-.modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: var(--spacing-md);
-    margin-top: var(--spacing-lg);
 }
 
 .footer {
@@ -1269,64 +1215,11 @@ button.btn:hover {
         gap: var(--spacing-sm);
         padding: var(--spacing-sm) var(--spacing-md);
     }
-    
-    .nav-menu {
-        gap: var(--spacing-sm);
-        justify-content: center;
-        width: 100%;
-    }
-    
-    .nav-link {
-        padding: var(--spacing-xs) var(--spacing-sm);
-        font-size: var(--font-size-sm);
-    }
-    
-    .favorites-info {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .form-actions {
-        flex-direction: column;
-    }
-    
-    .theme-options {
-        flex-direction: column;
-        align-items: center;
-        gap: var(--spacing-sm);
-    }
-    
-    .colors-showcase {
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .footer-content {
-        flex-direction: column;
-        text-align: center;
-        gap: var(--spacing-md);
-    }
-    
-    .team-card {
-        max-width: none;
-    }
-    
-    .modal-content {
-        width: 95%;
-        margin: 10% auto;
-        padding: var(--spacing-md);
-    }
-    
-    .team-initials-modal {
-        width: 70px;
-        height: 35px;
-        font-size: 16px;
-    }
 }
 
 @media (max-width: 480px) {
     .container {
-        padding: 0 var(--spacing-sm);
+        padding: 0 var(--spacing-md);
     }
     
     .team-details {
@@ -1433,50 +1326,19 @@ button.btn:hover {
     }
     
     .modal-content {
-        width: 98%;
-        margin: 5% auto;
-        padding: var(--spacing-sm);
+        width: 95%;
+        margin: 10% auto;
+        padding: var(--spacing-md);
     }
     
-    .modal-header h2 {
-        font-size: var(--font-size-lg);
-    }
-    
-    .close {
-        font-size: 24px;
-        padding: var(--spacing-xs);
-    }
-    
-    .footer-content {
-        padding: var(--spacing-md) var(--spacing-sm);
-    }
-    
-    .footer-section h3,
-    .footer-section h4 {
-        font-size: var(--font-size-base);
-    }
-    
-    .btn {
-        width: 100%;
-        margin-bottom: var(--spacing-xs);
-        justify-content: center;
-    }
-    
-    .form-group {
-        margin-bottom: var(--spacing-md);
-    }
-    
-    .form-group label {
-        font-size: var(--font-size-sm);
-    }
-    
-    .form-control {
+    .team-initials-modal {
+        width: 70px;
+        height: 35px;
         font-size: 16px;
-        padding: var(--spacing-sm);
     }
 }
 
-/* Very small screens */
+/* Очень маленькие экраны */
 @media (max-width: 320px) {
     :root {
         --spacing-xs: 0.2rem;
@@ -1528,7 +1390,7 @@ button.btn:hover {
     }
 }
 
-/* Touch improvements for all mobile devices */
+/* Улучшения для сенсорных устройств */
 @media (hover: none) and (pointer: coarse) {
     .btn,
     .nav-link,
@@ -1575,7 +1437,7 @@ button.btn:hover {
     }
 }
 
-/* Mobile landscape orientation */
+/* Альбомная ориентация мобильных устройств */
 @media (max-width: 768px) and (orientation: landscape) {
     .nav-container {
         flex-direction: row;
@@ -1613,7 +1475,7 @@ button.btn:hover {
     }
 }
 
-/* High DPI screens adjustments */
+/* Корректировки для экранов высокого разрешения */
 @media (-webkit-min-device-pixel-ratio: 2),
        (min-resolution: 2dppx) {
     .team-initials,
@@ -1627,7 +1489,7 @@ button.btn:hover {
     }
 }
 
-/* Reduce motion for users who prefer it */
+/* Снижение анимаций для пользователей, которые предпочитают это */
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -1648,7 +1510,7 @@ button.btn:hover {
     }
 }
 
-/* Print styles */
+/* Стили для печати */
 @media print {
     .navbar,
     .footer,

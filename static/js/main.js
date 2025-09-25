@@ -1,7 +1,9 @@
+// Инициализация приложения после загрузки DOM
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
 
+// Основная функция инициализации приложения
 function initializeApp() {
     initializeTheme();
     setupCSRF();
@@ -10,12 +12,12 @@ function initializeApp() {
     initializeLanguageHandling();
     setupMobileViewport();
     setupOrientationChange();
-    console.log('Basketball Fans App initialized');
+    console.log('Приложение для баскетбольных фанатов инициализировано');
 }
 
-// Setup mobile viewport handling
+// Настройка обработки мобильной области просмотра
 function setupMobileViewport() {
-    // Handle mobile viewport height issues
+    // Обработка проблем с высотой мобильной области просмотра
     function setViewportHeight() {
         const vh = window.innerHeight * 0.01;
         document.documentElement.style.setProperty('--vh', `${vh}px`);
@@ -28,20 +30,20 @@ function setupMobileViewport() {
     });
 }
 
-// Handle orientation changes
+// Обработка изменений ориентации устройства
 function setupOrientationChange() {
     window.addEventListener('orientationchange', function() {
         setTimeout(() => {
-            // Recalculate grid layouts
+            // Пересчитать сетку команд
             const teamsGrid = document.querySelector('.teams-grid');
             if (teamsGrid) {
-                // Force reflow
+                // Принудительный перерасчет
                 teamsGrid.style.display = 'none';
-                teamsGrid.offsetHeight; // Trigger reflow
+                teamsGrid.offsetHeight; // Триггер перерасчета
                 teamsGrid.style.display = 'grid';
             }
             
-            // Close any open modals on orientation change for better UX
+            // Закрыть открытые модальные окна при изменении ориентации для лучшего UX
             const openModals = document.querySelectorAll('.modal[style*="flex"]');
             if (openModals.length > 0) {
                 closeModal();
@@ -50,9 +52,10 @@ function setupOrientationChange() {
     });
 }
 
+// Инициализация темы оформления
 function initializeTheme() {
     const savedTheme = getCookie('theme') || 'light';
-    console.log('Initializing theme:', savedTheme);
+    console.log('Инициализация темы:', savedTheme);
     document.documentElement.setAttribute('data-theme', savedTheme);
     const themeInputs = document.querySelectorAll('input[name="theme"]');
     themeInputs.forEach(input => {
@@ -61,9 +64,10 @@ function initializeTheme() {
         }
     });
     const appliedTheme = document.documentElement.getAttribute('data-theme');
-    console.log('Theme applied successfully:', appliedTheme);
+    console.log('Тема успешно применена:', appliedTheme);
 }
 
+// Настройка CSRF токена
 function setupCSRF() {
     const csrftoken = getCookie('csrftoken');
     if (csrftoken) {
@@ -71,6 +75,7 @@ function setupCSRF() {
     }
 }
 
+// Получение значения cookie по имени
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -86,12 +91,14 @@ function getCookie(name) {
     return cookieValue;
 }
 
+// Установка cookie
 function setCookie(name, value, days = 365) {
     const expires = new Date();
     expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
     document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/`;
 }
 
+// Переключение избранного для команды
 function toggleFavorite(teamId) {
     const teamCard = document.querySelector(`[data-team-id="${teamId}"]`);
     const favoriteBtn = teamCard ? teamCard.querySelector('.favorite-btn') : document.querySelector('.btn-favorite');
@@ -113,7 +120,7 @@ function toggleFavorite(teamId) {
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`HTTP ошибка! статус: ${response.status}`);
         }
         return response.json();
     })
@@ -121,11 +128,11 @@ function toggleFavorite(teamId) {
         if (data.success) {
             updateFavoriteUI(teamId, data.is_favorite, data.favorite_count);
         } else {
-            throw new Error(data.error || 'Unknown error occurred');
+            throw new Error(data.error || 'Произошла неизвестная ошибка');
         }
     })
     .catch(error => {
-        console.error('Error toggling favorite:', error);
+        console.error('Ошибка переключения избранного:', error);
     })
     .finally(() => {
         if (favoriteBtn) {
@@ -135,6 +142,7 @@ function toggleFavorite(teamId) {
     });
 }
 
+// Обновление интерфейса избранного
 function updateFavoriteUI(teamId, isFavorite, favoriteCount) {
     const teamCard = document.querySelector(`[data-team-id="${teamId}"]`);
     if (teamCard) {
@@ -145,12 +153,12 @@ function updateFavoriteUI(teamId, isFavorite, favoriteCount) {
             favoriteBtn.classList.add('active');
             heartIcon.classList.remove('far');
             heartIcon.classList.add('fas');
-            favoriteBtn.title = 'Remove from favorites';
+            favoriteBtn.title = 'Убрать из избранного';
         } else {
             favoriteBtn.classList.remove('active');
             heartIcon.classList.remove('fas');
             heartIcon.classList.add('far');
-            favoriteBtn.title = 'Add to favorites';
+            favoriteBtn.title = 'Добавить в избранное';
         }
     }
     
@@ -158,18 +166,19 @@ function updateFavoriteUI(teamId, isFavorite, favoriteCount) {
     if (detailBtn) {
         if (isFavorite) {
             detailBtn.classList.add('active');
-            detailBtn.innerHTML = '<i class="fas fa-heart"></i> Remove from Favorites';
-            detailBtn.title = 'Remove from favorites';
+            detailBtn.innerHTML = '<i class="fas fa-heart"></i> Убрать из избранного';
+            detailBtn.title = 'Убрать из избранного';
         } else {
             detailBtn.classList.remove('active');
-            detailBtn.innerHTML = '<i class="far fa-heart"></i> Add to Favorites';
-            detailBtn.title = 'Add to favorites';
+            detailBtn.innerHTML = '<i class="far fa-heart"></i> Добавить в избранное';
+            detailBtn.title = 'Добавить в избранное';
         }
     }
     
     updateFavoriteCounters(favoriteCount);
 }
 
+// Обновление счетчиков избранных
 function updateFavoriteCounters(count) {
     const counters = [
         '#favorites-count',
@@ -192,6 +201,7 @@ function updateFavoriteCounters(count) {
 let themeChangeInProgress = false;
 let themeChangeTimeout = null;
 
+// Предварительный просмотр темы
 function previewTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
     
@@ -199,17 +209,18 @@ function previewTheme(theme) {
         changeThemeAjax(theme);
     }
     
-    console.log(`Theme changed to ${theme}`);
+    console.log(`Тема изменена на ${theme}`);
 }
 
+// Изменение темы через AJAX
 function changeThemeAjax(theme) {
     if (themeChangeInProgress) {
-        console.log('Theme change already in progress, skipping');
+        console.log('Изменение темы уже выполняется, пропуск');
         return;
     }
     
     setCookie('theme', theme, 365);
-    console.log('Theme saved to cookie immediately:', theme);
+    console.log('Тема сохранена в cookie немедленно:', theme);
     
     if (themeChangeTimeout) {
         clearTimeout(themeChangeTimeout);
@@ -220,6 +231,7 @@ function changeThemeAjax(theme) {
     }, 300);
 }
 
+// Выполнение изменения темы
 function executeThemeChange(theme) {
     if (themeChangeInProgress) {
         return;
@@ -239,23 +251,23 @@ function executeThemeChange(theme) {
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`HTTP ошибка! статус: ${response.status}`);
         }
         return response.json();
     })
     .then(data => {
         if (data.success) {
-            console.log('Theme saved successfully:', data.theme);
+            console.log('Тема успешно сохранена:', data.theme);
             setCookie('theme', theme, 365);
         } else {
-            throw new Error(data.error || 'Unknown error occurred');
+            throw new Error(data.error || 'Произошла неизвестная ошибка');
         }
     })
     .catch(error => {
-        console.error('Error saving theme via AJAX:', error);
+        console.error('Ошибка сохранения темы через AJAX:', error);
         setCookie('theme', theme, 365);
-        console.log('Theme saved to cookie as fallback:', theme);
-        console.log('Theme changed (saved locally)');
+        console.log('Тема сохранена в cookie как резервный вариант:', theme);
+        console.log('Тема изменена (сохранена локально)');
     })
     .finally(() => {
         themeChangeInProgress = false;
@@ -266,14 +278,15 @@ function executeThemeChange(theme) {
     });
 }
 
+// Инициализация интерактивности
 function initializeInteractivity() {
-    // Check if device supports touch
+    // Проверка поддержки сенсорного устройства
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     
     const teamCards = document.querySelectorAll('.team-card');
     teamCards.forEach(card => {
         if (!isTouchDevice) {
-            // Only add hover effects for non-touch devices
+            // Добавить эффекты наведения только для несенсорных устройств
             card.addEventListener('mouseenter', function() {
                 this.style.transform = 'translateY(-4px)';
             });
@@ -282,7 +295,7 @@ function initializeInteractivity() {
                 this.style.transform = 'translateY(0)';
             });
         } else {
-            // Add touch feedback for touch devices
+            // Добавить обратную связь для сенсорных устройств
             card.addEventListener('touchstart', function() {
                 this.style.transform = 'scale(0.98)';
             }, { passive: true });
@@ -293,11 +306,11 @@ function initializeInteractivity() {
         }
     });
     
-    // Improve button interactions for touch devices
+    // Улучшить взаимодействие с кнопками для сенсорных устройств
     const buttons = document.querySelectorAll('.btn, .favorite-btn, .team-info-btn');
     buttons.forEach(button => {
         if (isTouchDevice) {
-            // Add touch feedback
+            // Добавить обратную связь при касании
             button.addEventListener('touchstart', function() {
                 this.style.transform = 'scale(0.95)';
                 this.style.opacity = '0.8';
@@ -326,7 +339,7 @@ function initializeInteractivity() {
         });
     });
     
-    // Add double-tap prevention for favorite buttons
+    // Добавить предотвращение двойного касания для кнопок избранного
     let lastTouchTime = 0;
     document.querySelectorAll('.toggle-favorite-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
@@ -360,7 +373,7 @@ function initializeInteractivity() {
         });
     });
     
-    // Add swipe support for modals on mobile
+    // Добавить поддержку свайпа для модальных окон на мобильных устройствах
     const modals = document.querySelectorAll('.modal');
     modals.forEach(modal => {
         if (isTouchDevice) {
@@ -369,6 +382,7 @@ function initializeInteractivity() {
     });
 }
 
+// Настройка навигации с клавиатуры
 function setupKeyboardNavigation() {
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
@@ -385,7 +399,7 @@ function setupKeyboardNavigation() {
             window.location.href = '/';
         }
         
-        // Ctrl+P for preferences
+        // Ctrl+P для настроек
         if (e.ctrlKey && e.key === 'p') {
             e.preventDefault();
             window.location.href = '/preferences/';
@@ -393,7 +407,7 @@ function setupKeyboardNavigation() {
     });
 }
 
-// Swipe to close modal functionality
+// Функциональность свайпа для закрытия модального окна
 function addSwipeToClose(modal) {
     let startY = 0;
     let currentY = 0;
@@ -412,7 +426,7 @@ function addSwipeToClose(modal) {
         currentY = e.touches[0].clientY;
         const deltaY = currentY - startY;
         
-        // Only allow downward swipe
+        // Разрешить только свайп вниз
         if (deltaY > 0) {
             const opacity = Math.max(0.3, 1 - (deltaY / 300));
             modal.style.backgroundColor = `rgba(0, 0, 0, ${opacity * 0.5})`;
@@ -427,10 +441,10 @@ function addSwipeToClose(modal) {
         modalContent.style.transition = 'transform 0.3s ease';
         
         if (deltaY > 100) {
-            // Close modal if swiped down enough
+            // Закрыть модальное окно, если свайп вниз достаточен
             closeModal();
         } else {
-            // Reset position
+            // Сбросить позицию
             modalContent.style.transform = 'translateY(0)';
             modal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
         }
@@ -443,22 +457,22 @@ function addSwipeToClose(modal) {
     modalContent.addEventListener('touchend', handleTouchEnd, { passive: true });
 }
 
-// Improve modal accessibility for mobile
+// Улучшение доступности модальных окон для мобильных устройств
 function showModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
         modal.style.display = 'flex';
         
-        // Prevent body scroll on mobile
+        // Предотвратить прокрутку body на мобильных устройствах
         document.body.style.overflow = 'hidden';
         
-        // Focus management
+        // Управление фокусом
         const firstFocusable = modal.querySelector('button, input, select, textarea, a[href]');
         if (firstFocusable) {
             firstFocusable.focus();
         }
         
-        // Add backdrop click to close
+        // Добавить закрытие при клике на фон
         modal.addEventListener('click', function(e) {
             if (e.target === modal) {
                 closeModal();
@@ -467,27 +481,28 @@ function showModal(modalId) {
     }
 }
 
+// Закрытие модального окна
 function closeModal() {
     const modals = document.querySelectorAll('.modal');
     modals.forEach(modal => {
         modal.style.display = 'none';
         
-        // Reset modal content position
+        // Сбросить позицию содержимого модального окна
         const modalContent = modal.querySelector('.modal-content');
         if (modalContent) {
             modalContent.style.transform = 'translateY(0)';
             modalContent.style.transition = '';
         }
         
-        // Reset modal background
+        // Сбросить фон модального окна
         modal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
     });
     
-    // Restore body scroll
+    // Восстановить прокрутку body
     document.body.style.overflow = '';
 }
 
-// Confirmation modal
+// Модальное окно подтверждения
 function showConfirmModal(message, confirmCallback) {
     const modal = document.getElementById('confirmModal');
     if (modal) {
@@ -498,53 +513,53 @@ function showConfirmModal(message, confirmCallback) {
         };
         showModal('confirmModal');
     } else {
-        // Fallback to browser confirm
+        // Резервный вариант через браузерное подтверждение
         if (confirm(message)) {
             confirmCallback();
         }
     }
 }
 
-// Clear all favorites
+// Очистка всех избранных
 function clearAllFavorites() {
     showConfirmModal(
-        'Are you sure you want to remove all favorite teams? This action cannot be undone.',
+        'Вы уверены, что хотите удалить все избранные команды? Это действие нельзя отменить.',
         function() {
             setCookie('favorite_teams', '[]', 365);
-            console.log('All favorites cleared');
+            console.log('Все избранные очищены');
             location.reload();
         }
     );
 }
 
-// Reset preferences to defaults
+// Сброс настроек к значениям по умолчанию
 function resetToDefaults() {
     showConfirmModal(
-        'Reset all preferences to default values? This will clear your language, theme, and favorite teams.',
+        'Сбросить все настройки к значениям по умолчанию? Это очистит ваш язык, тему и избранные команды.',
         function() {
-            // Clear all preference cookies
+            // Очистить все cookies настроек
             setCookie('django_language', '', -1);
             setCookie('theme', '', -1);
             setCookie('favorite_teams', '[]', -1);
             
-            // Reset to defaults
+            // Сбросить к значениям по умолчанию
             document.documentElement.setAttribute('data-theme', 'light');
             
-            console.log('Preferences reset to defaults');
+            console.log('Настройки сброшены к значениям по умолчанию');
             location.reload();
         }
     );
 }
 
-// Share functionality
+// Функциональность обмена
 function shareTeam(teamName, teamDescription) {
     if (navigator.share) {
         navigator.share({
-            title: teamName || 'Basketball Team',
-            text: teamDescription || 'Check out this basketball team!',
+            title: teamName || 'Баскетбольная команда',
+            text: teamDescription || 'Посмотрите эту баскетбольную команду!',
             url: window.location.href
         }).catch(err => {
-            console.log('Error sharing:', err);
+            console.log('Ошибка обмена:', err);
             fallbackShare();
         });
     } else {
@@ -552,27 +567,29 @@ function shareTeam(teamName, teamDescription) {
     }
 }
 
+// Резервный вариант обмена
 function fallbackShare() {
     if (navigator.clipboard) {
         navigator.clipboard.writeText(window.location.href).then(() => {
-            console.log('Team link copied to clipboard!');
+            console.log('Ссылка на команду скопирована в буфер обмена!');
         }).catch(() => {
-            console.log('Unable to copy link');
+            console.log('Не удалось скопировать ссылку');
         });
     } else {
-        console.log('Sharing not supported on this device');
+        console.log('Обмен не поддерживается на этом устройстве');
     }
 }
 
-// Print functionality
+// Функциональность печати
 function printTeamInfo() {
     window.print();
 }
 
-// Language selector functionality
+// Обработчик выбора языка
 let languageChangeInProgress = false;
 let languageChangeTimeout = null;
 
+// Обновление отображения языка
 function updateLanguageDisplay() {
     const languageSelect = document.getElementById('language');
     const display = document.getElementById('current-language-display');
@@ -583,29 +600,30 @@ function updateLanguageDisplay() {
     }
 }
 
-// AJAX Language switching with infinite request prevention
+// Переключение языка через AJAX с предотвращением бесконечных запросов
 function changeLanguageAjax(language) {
-    // Prevent multiple concurrent requests
+    // Предотвратить несколько одновременных запросов
     if (languageChangeInProgress) {
-        console.log('Language change already in progress, skipping');
+        console.log('Изменение языка уже выполняется, пропуск');
         return;
     }
     
-    // Also save to cookie immediately for immediate persistence
+    // Также сохранить в cookie немедленно для немедленного сохранения
     setCookie('django_language', language, 365);
-    console.log('Language saved to cookie immediately:', language);
+    console.log('Язык сохранен в cookie немедленно:', language);
     
-    // Clear any pending timeout
+    // Очистить любые ожидающие таймауты
     if (languageChangeTimeout) {
         clearTimeout(languageChangeTimeout);
     }
     
-    // Debounce the request
+    // Дебаунсинг запроса
     languageChangeTimeout = setTimeout(() => {
         executeLanguageChange(language);
     }, 300);
 }
 
+// Выполнение изменения языка
 function executeLanguageChange(language) {
     if (languageChangeInProgress) {
         return;
@@ -613,14 +631,14 @@ function executeLanguageChange(language) {
     
     languageChangeInProgress = true;
     
-    // Immediate UI feedback
+    // Немедленная обратная связь с пользователем
     const languageSelect = document.getElementById('language');
     if (languageSelect) {
         languageSelect.disabled = true;
     }
     
-    // Show loading feedback in console
-    console.log('Changing language...');
+    // Показать обратную связь в консоли
+    console.log('Изменение языка...');
     
     fetch('/change-language/', {
         method: 'POST',
@@ -634,45 +652,45 @@ function executeLanguageChange(language) {
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`HTTP ошибка! статус: ${response.status}`);
         }
         return response.json();
     })
     .then(data => {
         if (data.success) {
-            // Update UI immediately
+            // Немедленно обновить интерфейс
             updateLanguageDisplay();
             
-            // Reload page after short delay to apply language changes
+            // Перезагрузить страницу через короткую задержку для применения изменений языка
             setTimeout(() => {
                 window.location.reload();
             }, 1000);
         } else {
-            throw new Error(data.error || 'Unknown error occurred');
+            throw new Error(data.error || 'Произошла неизвестная ошибка');
         }
     })
     .catch(error => {
-        console.error('Error changing language via AJAX:', error);
-        // Fallback: save to cookie directly (already done above)
-        console.log('Language saved to cookie as fallback:', language);
+        console.error('Ошибка изменения языка через AJAX:', error);
+        // Резервный вариант: сохранить напрямую в cookie (уже сделано выше)
+        console.log('Язык сохранен в cookie как резервный вариант:', language);
         
-        // Update UI immediately
+        // Немедленно обновить интерфейс
         updateLanguageDisplay();
         
-        // Reload page after short delay to apply language changes
+        // Перезагрузить страницу через короткую задержку для применения изменений языка
         setTimeout(() => {
             window.location.reload();
         }, 1000);
     })
     .finally(() => {
-        // Cleanup
+        // Очистка
         languageChangeInProgress = false;
         
         if (languageSelect) {
             languageSelect.disabled = false;
         }
         
-        // Clear timeout
+        // Очистить таймаут
         if (languageChangeTimeout) {
             clearTimeout(languageChangeTimeout);
             languageChangeTimeout = null;
@@ -680,18 +698,19 @@ function executeLanguageChange(language) {
     });
 }
 
-// Initialize language change handler
+// Инициализация обработчика изменения языка
 function initializeLanguageHandling() {
     const languageSelect = document.getElementById('language');
     if (languageSelect) {
-        // Remove any existing handlers to prevent duplicates
+        // Удалить любые существующие обработчики для предотвращения дубликатов
         languageSelect.removeEventListener('change', handleLanguageChange);
         
-        // Add new handler
+        // Добавить новый обработчик
         languageSelect.addEventListener('change', handleLanguageChange);
     }
 }
 
+// Обработчик изменения языка
 function handleLanguageChange(event) {
     const selectedLanguage = event.target.value;
     if (selectedLanguage) {
@@ -699,25 +718,25 @@ function handleLanguageChange(event) {
     }
 }
 
-// Form validation
+// Валидация формы
 function validatePreferencesForm(form) {
     const language = form.querySelector('select[name="language"]');
     const theme = form.querySelector('input[name="theme"]:checked');
     
     if (!language || !language.value) {
-        console.error('Please select a language');
+        console.error('Пожалуйста, выберите язык');
         return false;
     }
     
     if (!theme) {
-        console.error('Please select a theme');
+        console.error('Пожалуйста, выберите тему');
         return false;
     }
     
     return true;
 }
 
-// Search functionality (if needed in future)
+// Функциональность поиска (если потребуется в будущем)
 function searchTeams(query) {
     const teams = document.querySelectorAll('.team-card');
     const searchTerm = query.toLowerCase();
@@ -734,41 +753,41 @@ function searchTeams(query) {
     });
 }
 
-// Performance monitoring
+// Мониторинг производительности
 function logPerformance() {
     if (window.performance && window.performance.timing) {
         const timing = window.performance.timing;
         const loadTime = timing.loadEventEnd - timing.navigationStart;
-        console.log(`Page loaded in ${loadTime}ms`);
+        console.log(`Страница загружена за ${loadTime}мс`);
     }
 }
 
-// Error handling
+// Обработка ошибок
 window.addEventListener('error', function(e) {
-    console.error('JavaScript error:', e.error);
+    console.error('Ошибка JavaScript:', e.error);
 });
 
-// Load performance logging
+// Загрузка мониторинга производительности
 window.addEventListener('load', logPerformance);
 
-// Team info modal functionality
+// Функциональность модального окна информации о команде
 function showTeamInfo(teamId) {
-    // Find team data from the page
+    // Найти данные команды на странице
     const teamCard = document.querySelector(`[data-team-id="${teamId}"]`);
     if (!teamCard) return;
     
-    const teamName = teamCard.querySelector('.team-name')?.textContent || 'Unknown Team';
-    const teamCity = teamCard.querySelector('.team-city')?.textContent || 'Unknown City';
-    const conference = teamCard.querySelector('.detail-value')?.textContent || 'Unknown';
+    const teamName = teamCard.querySelector('.team-name')?.textContent || 'Неизвестная команда';
+    const teamCity = teamCard.querySelector('.team-city')?.textContent || 'Неизвестный город';
+    const conference = teamCard.querySelector('.detail-value')?.textContent || 'Неизвестно';
     
-    // Get or create modal
+    // Получить или создать модальное окно
     let modal = document.getElementById('teamModal');
     if (!modal) {
         createTeamModal();
         modal = document.getElementById('teamModal');
     }
     
-    // Populate modal content
+    // Заполнить содержимое модального окна
     const modalTeamName = modal.querySelector('#modalTeamName');
     const modalTeamCity = modal.querySelector('#modalTeamCity');
     const modalConference = modal.querySelector('#modalConference');
@@ -779,7 +798,7 @@ function showTeamInfo(teamId) {
     if (modalConference) modalConference.textContent = conference;
     if (modalTeamInitials) {
         modalTeamInitials.textContent = teamName.slice(0, 2).toUpperCase();
-        // Copy colors from the original team card
+        // Копировать цвета из оригинальной карточки команды
         const originalInitials = teamCard.querySelector('.team-initials');
         if (originalInitials) {
             const style = window.getComputedStyle(originalInitials);
@@ -790,14 +809,14 @@ function showTeamInfo(teamId) {
     showModal('teamModal');
 }
 
-// Create team modal dynamically if it doesn't exist
+// Создать модальное окно команды динамически, если оно не существует
 function createTeamModal() {
     const modalHTML = `
         <div id="teamModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
                     <span class="close" onclick="closeModal()">&times;</span>
-                    <h2 id="modalTeamName">Team Name</h2>
+                    <h2 id="modalTeamName">Название команды</h2>
                 </div>
                 <div class="modal-body">
                     <div class="modal-team-logo">
@@ -806,13 +825,13 @@ function createTeamModal() {
                     <div class="modal-team-info">
                         <p class="modal-team-location">
                             <i class="fas fa-map-marker-alt"></i>
-                            <span id="modalTeamCity">City</span>
+                            <span id="modalTeamCity">Город</span>
                         </p>
                         <div class="modal-team-badges">
-                            <span id="modalConference" class="badge conference-badge">Conference</span>
+                            <span id="modalConference" class="badge conference-badge">Конференция</span>
                         </div>
                         <p id="modalTeamDescription" class="team-description">
-                            Quick information about this basketball team.
+                            Краткая информация об этой баскетбольной команде.
                         </p>
                     </div>
                 </div>
@@ -822,7 +841,7 @@ function createTeamModal() {
     
     document.body.insertAdjacentHTML('beforeend', modalHTML);
     
-    // Add swipe support if touch device
+    // Добавить поддержку свайпа, если сенсорное устройство
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     if (isTouchDevice) {
         const modal = document.getElementById('teamModal');
@@ -830,32 +849,45 @@ function createTeamModal() {
     }
 }
 
-// Filter teams function
+// Функция фильтрации команд
 function filterTeams(filter) {
     const allTeams = document.querySelectorAll('.team-card');
     const filterButtons = document.querySelectorAll('.filter-btn');
     
-    // Update active button
+    // Обновить активную кнопку
     filterButtons.forEach(btn => btn.classList.remove('active'));
     const activeButton = document.querySelector(`[data-filter="${filter}"]`);
     if (activeButton) {
         activeButton.classList.add('active');
     }
     
-    // Filter teams
+    // Фильтровать команды
     allTeams.forEach(team => {
         const favoriteBtn = team.querySelector('.favorite-btn');
-        // Check if team is favorite based on the button's active class
+        // Проверить, является ли команда избранной на основе активного класса кнопки
         const isFavorite = favoriteBtn && favoriteBtn.classList.contains('active');
         
         if (filter === 'all') {
-            team.style.display = 'block';
+            // Для "всех команд", показать все команды, соответствующие поиску (или все, если нет поиска)
+            const searchInput = document.getElementById('searchInput');
+            const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+            
+            if (searchTerm) {
+                // Если есть поисковый запрос, проверить, соответствует ли команда поиску
+                const name = team.querySelector('.team-name').textContent.toLowerCase();
+                const city = team.querySelector('.team-city').textContent.toLowerCase();
+                const matchesSearch = name.includes(searchTerm) || city.includes(searchTerm);
+                team.style.display = matchesSearch ? 'block' : 'none';
+            } else {
+                // Если нет поискового запроса, показать все команды
+                team.style.display = 'block';
+            }
         } else if (filter === 'favorites') {
             team.style.display = isFavorite ? 'block' : 'none';
         }
     });
     
-    // Show message if no favorites
+    // Показать сообщение, если нет избранных
     const visibleFavorites = document.querySelectorAll('.team-card .favorite-btn.active');
     if (filter === 'favorites' && visibleFavorites.length === 0) {
         showNoFavoritesMessage();
@@ -864,13 +896,14 @@ function filterTeams(filter) {
     }
 }
 
+// Показать сообщение об отсутствии избранных
 function showNoFavoritesMessage() {
     let message = document.querySelector('.no-favorites-message');
     if (!message) {
         message = document.createElement('div');
         message.className = 'no-favorites-message';
         
-        // Get current language for translations
+        // Получить текущий язык для переводов
         const currentLang = getCookie('django_language') || 'en';
         
         let title, description;
@@ -897,6 +930,7 @@ function showNoFavoritesMessage() {
     message.style.display = 'block';
 }
 
+// Скрыть сообщение об отсутствии избранных
 function hideNoFavoritesMessage() {
     const message = document.querySelector('.no-favorites-message');
     if (message) {
