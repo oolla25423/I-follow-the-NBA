@@ -2,10 +2,8 @@ from django import template
 from django.utils.safestring import mark_safe
 from django.utils import translation
 
-# Регистрация библиотеки шаблонных тегов
 register = template.Library()
 
-# Словарь переводов
 TRANSLATIONS = {
     'ru': {
         'Home': 'Главная',
@@ -91,14 +89,12 @@ TRANSLATIONS = {
     }
 }
 
-# Шаблонный тег для перевода текста
 @register.simple_tag(takes_context=True)
 def trans(context, message):
     current_language = translation.get_language()
     lang_translations = TRANSLATIONS.get(current_language, {})
     return mark_safe(lang_translations.get(message, message))
 
-# Шаблонный тег для перевода текста с поддержкой множественного числа
 @register.simple_tag(takes_context=True)
 def blocktrans(context, message, count=None, **kwargs):
     current_language = translation.get_language()

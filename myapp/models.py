@@ -1,6 +1,5 @@
 from django.db import models
 
-# Данные команд НБА
 TEAMS_DATA = {
     1: {
         'id': 1,
@@ -114,23 +113,19 @@ TEAMS_DATA = {
     }
 }
 
-# Доступные языки
 LANGUAGE_CHOICES = [
     ('en', 'English'),
     ('ru', 'Русский'),
 ]
 
-# Доступные темы
 THEME_CHOICES = [
     ('light', 'White'),
     ('dark', 'Black'),
     ('yellow', 'Yellow'),
 ]
 
-# Получить команду по ID
 def get_team_by_id(team_id):
     return TEAMS_DATA.get(team_id)
 
-# Получить все команды
 def get_all_teams():
     return list(TEAMS_DATA.values())

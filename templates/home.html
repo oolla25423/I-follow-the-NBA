@@ -109,45 +109,35 @@
 
 {% block extra_js %}
 <script>
-// Initialize favorites filter on page load
 document.addEventListener('DOMContentLoaded', function() {
-    // Apply team colors from data attributes
     document.querySelectorAll('.team-initials[data-color1]').forEach(element => {
         const color1 = element.dataset.color1;
         const color2 = element.dataset.color2;
         element.style.background = `linear-gradient(135deg, ${color1}, ${color2})`;
     });
     
-    // Add close modal handler
     const closeBtn = document.querySelector('[data-modal-close]');
     if (closeBtn) {
         closeBtn.addEventListener('click', closeTeamModal);
     }
     
-    // Add filter button handlers
     const filterButtons = document.querySelectorAll('.filter-btn');
-    console.log('Found filter buttons:', filterButtons.length);
     filterButtons.forEach(btn => {
-        console.log('Adding click handler to button:', btn);
         btn.addEventListener('click', function() {
             const filter = this.dataset.filter;
-            console.log('Filter clicked:', filter);
             if (window.filterTeams && typeof window.filterTeams === 'function') {
                 window.filterTeams(filter);
             }
             
-            // Show search bar only for "all teams" filter
             const searchBar = document.getElementById('searchBar');
             if (searchBar) {
                 if (filter === 'all') {
                     searchBar.style.display = 'block';
                 } else {
                     searchBar.style.display = 'none';
-                    // Clear search when switching to favorites
                     const searchInput = document.getElementById('searchInput');
                     if (searchInput) {
                         searchInput.value = '';
-                        // Trigger input event to clear search results
                         searchInput.dispatchEvent(new Event('input'));
                     }
                 }
@@ -155,16 +145,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Всегда показывать избранные при загрузке страницы (вместо сохраненного состояния)
     setTimeout(() => {
-        // Всегда устанавливать фильтр в 'favorites' вместо проверки сохраненного состояния
         if (window.filterTeams && typeof window.filterTeams === 'function') {
             window.filterTeams('favorites');
         }
     }, 100);
 });
 
-// Local getCookie function
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -180,10 +167,8 @@ function getCookie(name) {
     return cookieValue;
 }
 
-// Show team info in modal
 function showTeamInfo(teamId) {
     try {
-        // Find team data from the current page
         const teamCard = document.querySelector(`[data-team-id="${teamId}"]`);
         if (!teamCard) {
             console.error('Team card not found for ID:', teamId);
@@ -197,14 +182,11 @@ function showTeamInfo(teamId) {
         const teamInitials = teamCard.querySelector('.team-initials');
         const teamColors = teamInitials.style.background;
         
-        // Get current language first
         const currentLang = getCookie('django_language') || 'en';
         
-        // Set modal content
         document.getElementById('modalTeamName').textContent = teamName;
         document.getElementById('modalTeamCity').textContent = teamCity;
         
-        // Set conference and division with proper language
         if (currentLang === 'ru') {
             document.getElementById('modalConference').textContent = conferenceValue + ' Конференция';
             document.getElementById('modalDivision').textContent = divisionValue + ' Дивизион';
@@ -215,7 +197,6 @@ function showTeamInfo(teamId) {
         document.getElementById('modalTeamInitials').textContent = '';
         document.getElementById('modalTeamInitials').style.background = teamColors;
         
-        // Set description based on language (simple 3-sentence description)
         let description;
         if (currentLang === 'ru') {
             const descriptions = {
@@ -249,7 +230,6 @@ function showTeamInfo(teamId) {
         
         document.getElementById('modalTeamDescription').textContent = description;
         
-        // Show modal
         document.getElementById('teamModal').style.display = 'block';
     } catch (error) {
         console.error('Error showing team info:', error);
@@ -261,7 +241,6 @@ function closeTeamModal() {
     document.getElementById('teamModal').style.display = 'none';
 }
 
-// Close modal when clicking outside of it
 window.onclick = function(event) {
     const modal = document.getElementById('teamModal');
     if (event.target === modal) {

@@ -103,27 +103,21 @@
 
 {% block extra_js %}
 <script>
-// Theme preview functionality - use global function if available
 function previewTheme(theme) {
-    // Apply theme immediately
     document.documentElement.setAttribute('data-theme', theme);
     
-    // Save via AJAX if available
     if (typeof changeThemeAjax === 'function') {
         changeThemeAjax(theme);
     } else {
-        // Fallback: save to cookie directly
         document.cookie = `theme=${theme}; path=/; max-age=31536000`;
         console.log('Theme saved to cookie directly:', theme);
     }
     
-    // Show success message in console
     console.log(`Theme changed to ${theme}`);
     
     updateLanguageDisplay();
 }
 
-// Update language display
 function updateLanguageDisplay() {
     const languageSelect = document.getElementById('language');
     const display = document.getElementById('current-language-display');
@@ -131,21 +125,17 @@ function updateLanguageDisplay() {
     display.textContent = selectedOption.text;
 }
 
-// Language select change handler with AJAX
 document.getElementById('language').addEventListener('change', function() {
     const language = this.value;
     if (language && typeof changeLanguageAjax === 'function') {
         changeLanguageAjax(language);
     } else {
-        // Fallback: save to cookie directly
         document.cookie = `django_language=${language}; path=/; max-age=31536000`;
         updateLanguageDisplay();
-        // Optionally reload page to apply language change
         setTimeout(() => location.reload(), 1000);
     }
 });
 
-// Clear all favorites
 function clearAllFavorites() {
     showConfirmModal(
         'Are you sure you want to remove all favorite teams? This action cannot be undone.',
@@ -156,25 +146,20 @@ function clearAllFavorites() {
     );
 }
 
-// Reset to defaults
 function resetToDefaults() {
-    // Clear all preference cookies
     document.cookie = 'django_language=; path=/; max-age=0';
     document.cookie = 'theme=; path=/; max-age=0';
     document.cookie = 'favorite_teams=[]; path=/; max-age=0';
     
-    // Reset form to defaults
     document.getElementById('language').value = 'en';
     document.querySelector('input[value="light"]').checked = true;
     previewTheme('light');
     
     console.log('All preferences reset successfully!');
     
-    // Refresh the page
     location.reload();
 }
 
-// Modal functionality
 function showConfirmModal(message, confirmCallback) {
     document.getElementById('confirmMessage').textContent = message;
     document.getElementById('confirmBtn').onclick = function() {
@@ -188,9 +173,6 @@ function closeModal() {
     document.getElementById('confirmModal').style.display = 'none';
 }
 
-
-
-// Close modal when clicking outside
 window.onclick = function(event) {
     const modal = document.getElementById('confirmModal');
     if (event.target === modal) {
@@ -198,11 +180,9 @@ window.onclick = function(event) {
     }
 }
 
-// Form submission handler with guarding
 let formSubmissionInProgress = false;
 
 document.querySelector('.preferences-form').addEventListener('submit', function(e) {
-    // Prevent form submission - we handle everything via AJAX now
     e.preventDefault();
     
     if (formSubmissionInProgress) {
