@@ -25,6 +25,7 @@
     
     /* Шрифты */
     --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-size-xs: 0.75rem;
     --font-size-sm: 0.875rem;
     --font-size-base: 1rem;
     --font-size-lg: 1.125rem;
@@ -403,7 +404,7 @@ button.btn:hover {
 
 .modal-content {
     background-color: var(--surface-color);
-    margin: 10% auto;
+    margin: 18% auto; /* Changed from 15% to 20% to position even lower */
     padding: 0;
     border: none;
     border-radius: var(--border-radius);
@@ -428,7 +429,7 @@ button.btn:hover {
     padding: var(--spacing-md);
     border-bottom: 1px solid var(--border-color);
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     position: relative;
 }
@@ -438,10 +439,9 @@ button.btn:hover {
     color: var(--text-primary);
     font-size: var(--font-size-lg);
     font-weight: 600;
-    text-align: center;
 }
 
-.close {
+.close, .modal-close {
     color: var(--text-secondary);
     font-size: 24px;
     font-weight: bold;
@@ -457,12 +457,12 @@ button.btn:hover {
     justify-content: center;
     transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
     position: absolute;
-    right: var(--spacing-lg);
+    right: var(--spacing-md);
     top: 50%;
     transform: translateY(-50%);
 }
 
-.close:hover {
+.close:hover, .modal-close:hover {
     color: var(--accent-color);
     background-color: rgba(229, 57, 53, 0.1);
 }
@@ -1149,16 +1149,42 @@ button.btn:hover {
     padding: var(--spacing-xl);
     color: var(--text-secondary);
     grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin: 0 auto;
 }
 
 .no-teams i {
     font-size: 3rem;
     margin-bottom: var(--spacing-md);
     opacity: 0.5;
+    display: block;
+}
+
+.no-teams h3 {
+    margin: 0 0 var(--spacing-sm) 0;
+    text-align: center;
+}
+
+.no-teams p {
+    margin: 0;
+    text-align: center;
 }
 
 .no-favorites-message {
     grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+}
+
+.no-favorites-message .no-teams {
+    margin: 0 auto;
 }
 
 @media (max-width: 768px) {
@@ -1210,10 +1236,52 @@ button.btn:hover {
         grid-template-columns: 1fr;
     }
     
+    /* Improved mobile navigation */
     .nav-container {
-        flex-direction: column;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-between;
         gap: var(--spacing-sm);
         padding: var(--spacing-sm) var(--spacing-md);
+    }
+    
+    .nav-brand {
+        flex: 1;
+        min-width: 150px;
+    }
+    
+    .nav-menu {
+        display: flex;
+        justify-content: flex-end;
+        gap: var(--spacing-sm);
+        flex-wrap: nowrap;
+    }
+    
+    .nav-link span {
+        display: none;
+    }
+    
+    .nav-link {
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--spacing-xs);
+    }
+    
+    .favorites-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        min-height: 44px;
+    }
+    
+    .favorites-badge .badge {
+        min-width: 24px;
+        padding: var(--spacing-xs);
+        font-size: var(--font-size-xs);
     }
 }
 
@@ -1274,29 +1342,43 @@ button.btn:hover {
         right: var(--spacing-sm);
     }
     
+    /* Enhanced mobile navigation for small screens */
     .nav-container {
         padding: var(--spacing-xs) var(--spacing-sm);
+        gap: var(--spacing-xs);
     }
     
     .nav-brand a {
         font-size: var(--font-size-base);
+        gap: var(--spacing-xs);
     }
     
     .nav-menu {
-        flex-wrap: wrap;
         gap: var(--spacing-xs);
     }
     
     .nav-link {
         flex: 1;
-        min-width: 80px;
+        min-width: 44px;
         text-align: center;
         padding: var(--spacing-xs);
+        font-size: var(--font-size-sm);
     }
     
     .nav-link i {
         display: block;
-        margin-bottom: 2px;
+        margin-bottom: 0;
+        font-size: var(--font-size-lg);
+    }
+    
+    .favorites-badge {
+        min-width: 40px;
+    }
+    
+    .favorites-badge .badge {
+        min-width: 20px;
+        padding: 2px var(--spacing-xs);
+        font-size: 10px;
     }
     
     .filter-btn {
@@ -1338,7 +1420,7 @@ button.btn:hover {
     }
 }
 
-/* Очень маленькие экраны */
+/* Very small screens */
 @media (max-width: 320px) {
     :root {
         --spacing-xs: 0.2rem;
@@ -1346,6 +1428,7 @@ button.btn:hover {
         --spacing-md: 0.8rem;
         --spacing-lg: 1.2rem;
         --spacing-xl: 1.6rem;
+        --font-size-xs: 0.7rem;
         --font-size-sm: 0.8rem;
         --font-size-base: 0.9rem;
         --font-size-lg: 1rem;
@@ -1369,6 +1452,21 @@ button.btn:hover {
     
     .nav-brand a {
         font-size: var(--font-size-sm);
+    }
+    
+    .nav-link {
+        padding: var(--spacing-xs);
+        font-size: var(--font-size-xs);
+    }
+    
+    .nav-link i {
+        font-size: var(--font-size-sm);
+    }
+    
+    .favorites-badge .badge {
+        min-width: 18px;
+        padding: 1px var(--spacing-xs);
+        font-size: 9px;
     }
     
     .filter-btn {
@@ -1434,6 +1532,42 @@ button.btn:hover {
     .nav-link:active {
         transform: scale(0.95);
         transition: transform 0.1s ease;
+    }
+}
+
+/* Дополнительные улучшения для сенсорных устройств */
+@media (max-width: 768px) {
+    /* Увеличить область касания для кнопок */
+    .btn,
+    .nav-link,
+    .filter-btn,
+    .team-info-btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    /* Улучшить кнопку избранного для мобильных устройств */
+    .favorite-btn {
+        min-width: 44px;
+        min-height: 44px;
+        padding: var(--spacing-sm);
+        font-size: var(--font-size-xl);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Улучшить кнопку закрытия модального окна */
+    .close {
+        min-width: 44px;
+        min-height: 44px;
+        font-size: 28px;
+    }
+    
+    /* Улучшить элементы управления фильтром */
+    .filter-btn {
+        min-height: 44px;
+        padding: var(--spacing-sm) var(--spacing-md);
     }
 }
 
@@ -1530,4 +1664,144 @@ button.btn:hover {
     .teams-grid {
         grid-template-columns: repeat(2, 1fr);
     }
+}
+
+/* Enhanced mobile touch targets */
+@media (max-width: 768px) {
+    .team-card {
+        max-width: 100%;
+    }
+    
+    .team-initials {
+        width: 100px;
+        height: 50px;
+        font-size: 18px;
+    }
+    
+    .favorite-btn {
+        position: absolute;
+        top: var(--spacing-sm);
+        right: var(--spacing-sm);
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--spacing-sm);
+    }
+    
+    .team-info-btn {
+        min-height: 44px;
+    }
+}
+
+@media (max-width: 480px) {
+    .team-initials {
+        width: 90px;
+        height: 45px;
+        font-size: 16px;
+    }
+    
+    .team-name {
+        font-size: var(--font-size-lg);
+    }
+    
+    .detail-item {
+        font-size: var(--font-size-sm);
+    }
+}
+
+/* Landscape orientation improvements */
+@media (max-width: 768px) and (orientation: landscape) {
+    .teams-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+    
+    .team-initials {
+        width: 90px;
+        height: 45px;
+        font-size: 16px;
+    }
+}
+
+/* Enhanced modal styles for mobile */
+@media (max-width: 768px) {
+    .modal-content {
+        max-width: 95%;
+        margin: 5% auto;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .modal-header {
+        padding: var(--spacing-sm);
+    }
+    
+    .modal-header h2 {
+        font-size: var(--font-size-base);
+    }
+    
+    .close {
+        width: 44px;
+        height: 44px;
+        font-size: 28px;
+        right: var(--spacing-sm);
+    }
+    
+    .modal-body {
+        padding: var(--spacing-sm);
+    }
+    
+    .team-initials-modal {
+        width: 80px;
+        height: 40px;
+        font-size: 18px;
+    }
+    
+    .modal-team-location {
+        font-size: var(--font-size-sm);
+    }
+    
+    .modal-team-badges .badge {
+        font-size: var(--font-size-xs);
+        padding: var(--spacing-xs);
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-content {
+        width: 98%;
+        margin: 2% auto;
+        max-height: 96vh;
+    }
+    
+    .modal-header h2 {
+        font-size: var(--font-size-lg);
+    }
+    
+    .team-initials-modal {
+        width: 70px;
+        height: 35px;
+        font-size: 16px;
+    }
+    
+    .modal-team-badges {
+        gap: var(--spacing-xs);
+    }
+}
+
+/* Landscape orientation improvements */
+@media (max-width: 768px) and (orientation: landscape) {
+    .modal-content {
+        height: 90vh;
+        overflow-y: auto;
+    }
+}
+
+.modal-footer {
+    padding: var(--spacing-md);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-md);
 }

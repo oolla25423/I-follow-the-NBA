@@ -77,6 +77,7 @@
                     {% trans "Cancel" %}
                 </a>
             </div>
+
         </form>
     </div>
 
@@ -87,7 +88,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h3>Confirm Action</h3>
-            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <button class="close" onclick="closeModal()">&times;</button>
         </div>
         <div class="modal-body">
             <p id="confirmMessage">Are you sure you want to proceed?</p>
@@ -157,22 +158,20 @@ function clearAllFavorites() {
 
 // Reset to defaults
 function resetToDefaults() {
-    showConfirmModal(
-        'Reset all preferences to default values? This will clear your language, theme, and favorite teams.',
-        function() {
-            // Clear all preference cookies
-            document.cookie = 'django_language=; path=/; max-age=0';
-            document.cookie = 'theme=; path=/; max-age=0';
-            document.cookie = 'favorite_teams=[]; path=/; max-age=0';
-            
-            // Reset form to defaults
-            document.getElementById('language').value = 'en';
-            document.querySelector('input[value="light"]').checked = true;
-            previewTheme('light');
-            
-            console.log('All preferences reset successfully!');
-        }
-    );
+    // Clear all preference cookies
+    document.cookie = 'django_language=; path=/; max-age=0';
+    document.cookie = 'theme=; path=/; max-age=0';
+    document.cookie = 'favorite_teams=[]; path=/; max-age=0';
+    
+    // Reset form to defaults
+    document.getElementById('language').value = 'en';
+    document.querySelector('input[value="light"]').checked = true;
+    previewTheme('light');
+    
+    console.log('All preferences reset successfully!');
+    
+    // Refresh the page
+    location.reload();
 }
 
 // Modal functionality

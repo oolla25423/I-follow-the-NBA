@@ -4,7 +4,8 @@
 <html lang="{{ current_language|default:'en' }}" data-theme="{{ current_theme|default:'light' }}">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#d84315">
     <title>{% block title %}{% trans "Basketball Fans" %}{% endblock %}</title>
     
     <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
@@ -12,7 +13,7 @@
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}?v=1.4">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}?v=1.6">
     
     {% block extra_css %}{% endblock %}
 </head>
@@ -27,15 +28,15 @@
             </div>
             
             <div class="nav-menu">
-                <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" title="{% trans 'Home' %}">
                     <i class="fas fa-home"></i>
-                    {% trans "Home" %}
+                    <span>{% trans "Home" %}</span>
                 </a>
-                <a href="{% url 'preferences' %}" class="nav-link {% if request.resolver_match.url_name == 'preferences' %}active{% endif %}">
+                <a href="{% url 'preferences' %}" class="nav-link {% if request.resolver_match.url_name == 'preferences' %}active{% endif %}" title="{% trans 'Preferences' %}">
                     <i class="fas fa-cog"></i>
-                    {% trans "Preferences" %}
+                    <span>{% trans "Preferences" %}</span>
                 </a>
-                <div class="favorites-badge">
+                <div class="favorites-badge" title="{% trans 'Favorite teams' %}">
                     <i class="fas fa-heart"></i>
                     <span class="badge" id="favorites-count">{{ favorite_count|default:0 }}</span>
                 </div>

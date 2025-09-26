@@ -12,6 +12,39 @@ function initializeApp() {
     initializeLanguageHandling();
     setupMobileViewport();
     setupOrientationChange();
+    initializeSearch();
+    
+    // Восстановить состояние фильтра при загрузке страницы
+    const savedFilter = sessionStorage.getItem('nbaFilter');
+    if (savedFilter) {
+        // Небольшая задержка, чтобы убедиться, что DOM полностью загружен
+        setTimeout(() => {
+            if (window.filterTeams && typeof window.filterTeams === 'function') {
+                window.filterTeams(savedFilter);
+            }
+        }, 100);
+    } else {
+        // По умолчанию показывать избранные
+        setTimeout(() => {
+            if (window.filterTeams && typeof window.filterTeams === 'function') {
+                window.filterTeams('favorites');
+            }
+        }, 100);
+    }
+    
+    // Обработчик события pageshow для восстановления состояния при возврате по истории
+    window.addEventListener('pageshow', function(event) {
+        // При возврате по истории браузера восстановить состояние фильтра
+        if (event.persisted) {
+            const savedFilter = sessionStorage.getItem('nbaFilter') || 'favorites';
+            setTimeout(() => {
+                if (window.filterTeams && typeof window.filterTeams === 'function') {
+                    window.filterTeams(savedFilter);
+                }
+            }, 50);
+        }
+    });
+    
     console.log('Приложение для баскетбольных фанатов инициализировано');
 }
 
@@ -26,6 +59,7 @@ function setupMobileViewport() {
     setViewportHeight();
     window.addEventListener('resize', setViewportHeight);
     window.addEventListener('orientationchange', () => {
+        // Добавить небольшую задержку для правильного пересчета
         setTimeout(setViewportHeight, 100);
     });
 }
@@ -47,6 +81,11 @@ function setupOrientationChange() {
             const openModals = document.querySelectorAll('.modal[style*="flex"]');
             if (openModals.length > 0) {
                 closeModal();
+            }
+            
+            // Пересчитать высоту области просмотра
+            if (typeof setupMobileViewport === 'function') {
+                setupMobileViewport();
             }
         }, 300);
     });
@@ -88,6 +127,7 @@ function getCookie(name) {
             }
         }
     }
+    console.log(`Cookie ${name}:`, cookieValue);
     return cookieValue;
 }
 
@@ -126,7 +166,15 @@ function toggleFavorite(teamId) {
     })
     .then(data => {
         if (data.success) {
+            console.log('Toggle favorite response:', data);
             updateFavoriteUI(teamId, data.is_favorite, data.favorite_count);
+            // Обновить фильтрацию после изменения избранного
+            setTimeout(() => {
+                const activeFilter = sessionStorage.getItem('nbaFilter') || 'favorites';
+                if (window.filterTeams && typeof window.filterTeams === 'function') {
+                    window.filterTeams(activeFilter);
+                }
+            }, 100); // Небольшая задержка для завершения обновления UI
         } else {
             throw new Error(data.error || 'Произошла неизвестная ошибка');
         }
@@ -144,24 +192,34 @@ function toggleFavorite(teamId) {
 
 // Обновление интерфейса избранного
 function updateFavoriteUI(teamId, isFavorite, favoriteCount) {
-    const teamCard = document.querySelector(`[data-team-id="${teamId}"]`);
-    if (teamCard) {
+    console.log(`Updating favorite UI for team ${teamId}, isFavorite: ${isFavorite}, count: ${favoriteCount}`);
+    // Обновить все кнопки избранного для этой команды
+    const teamCards = document.querySelectorAll(`[data-team-id="${teamId}"]`);
+    console.log(`Found ${teamCards.length} team cards for team ${teamId}`);
+    teamCards.forEach(teamCard => {
         const favoriteBtn = teamCard.querySelector('.favorite-btn');
-        const heartIcon = favoriteBtn.querySelector('i');
-        
-        if (isFavorite) {
-            favoriteBtn.classList.add('active');
-            heartIcon.classList.remove('far');
-            heartIcon.classList.add('fas');
-            favoriteBtn.title = 'Убрать из избранного';
-        } else {
-            favoriteBtn.classList.remove('active');
-            heartIcon.classList.remove('fas');
-            heartIcon.classList.add('far');
-            favoriteBtn.title = 'Добавить в избранное';
+        if (favoriteBtn) {
+            const heartIcon = favoriteBtn.querySelector('i');
+            
+            if (isFavorite) {
+                favoriteBtn.classList.add('active');
+                heartIcon.classList.remove('far');
+                heartIcon.classList.add('fas');
+                favoriteBtn.title = 'Убрать из избранного';
+            } else {
+                favoriteBtn.classList.remove('active');
+                heartIcon.classList.remove('fas');
+                heartIcon.classList.add('far');
+                favoriteBtn.title = 'Добавить в избранное';
+            }
         }
-    }
+        
+        // Обновить атрибут data-is-favorite для корректной фильтрации
+        teamCard.dataset.isFavorite = isFavorite ? 'true' : 'false';
+        console.log(`Updated team ${teamId} data-is-favorite to ${isFavorite ? 'true' : 'false'}`);
+    });
     
+    // Обновить кнопку в модальном окне, если она существует
     const detailBtn = document.querySelector('.btn-favorite');
     if (detailBtn) {
         if (isFavorite) {
@@ -176,6 +234,14 @@ function updateFavoriteUI(teamId, isFavorite, favoriteCount) {
     }
     
     updateFavoriteCounters(favoriteCount);
+    
+    // Обновить фильтрацию после изменения избранного
+    setTimeout(() => {
+        const activeFilter = sessionStorage.getItem('nbaFilter') || 'favorites';
+        if (window.filterTeams && typeof window.filterTeams === 'function') {
+            window.filterTeams(activeFilter);
+        }
+    }, 100); // Небольшая задержка для завершения обновления UI
 }
 
 // Обновление счетчиков избранных
@@ -280,6 +346,8 @@ function executeThemeChange(theme) {
 
 // Инициализация интерактивности
 function initializeInteractivity() {
+    // Инициализировать события карточек команд
+    initializeTeamCardEvents();
     // Проверка поддержки сенсорного устройства
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     
@@ -380,6 +448,17 @@ function initializeInteractivity() {
             addSwipeToClose(modal);
         }
     });
+    
+    // Добавить обработку изменения размера окна для адаптивных элементов
+    window.addEventListener('resize', function() {
+        // Обновить позиционирование элементов при изменении размера
+        const teamsGrid = document.querySelector('.teams-grid');
+        if (teamsGrid) {
+            teamsGrid.style.display = 'none';
+            teamsGrid.offsetHeight; // Триггер перерасчета
+            teamsGrid.style.display = 'grid';
+        }
+    });
 }
 
 // Настройка навигации с клавиатуры
@@ -465,6 +544,9 @@ function showModal(modalId) {
         
         // Предотвратить прокрутку body на мобильных устройствах
         document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.top = '0';
+        document.body.style.width = '100%';
         
         // Управление фокусом
         const firstFocusable = modal.querySelector('button, input, select, textarea, a[href]');
@@ -472,12 +554,15 @@ function showModal(modalId) {
             firstFocusable.focus();
         }
         
-        // Добавить закрытие при клике на фон
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                closeModal();
-            }
-        });
+        // Добавить закрытие при клике на фон (однократно)
+        if (!modal.dataset.bgClickBound) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+            modal.dataset.bgClickBound = '1';
+        }
     }
 }
 
@@ -500,6 +585,9 @@ function closeModal() {
     
     // Восстановить прокрутку body
     document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
 }
 
 // Модальное окно подтверждения
@@ -718,40 +806,8 @@ function handleLanguageChange(event) {
     }
 }
 
-// Валидация формы
-function validatePreferencesForm(form) {
-    const language = form.querySelector('select[name="language"]');
-    const theme = form.querySelector('input[name="theme"]:checked');
-    
-    if (!language || !language.value) {
-        console.error('Пожалуйста, выберите язык');
-        return false;
-    }
-    
-    if (!theme) {
-        console.error('Пожалуйста, выберите тему');
-        return false;
-    }
-    
-    return true;
-}
-
-// Функциональность поиска (если потребуется в будущем)
-function searchTeams(query) {
-    const teams = document.querySelectorAll('.team-card');
-    const searchTerm = query.toLowerCase();
-    
-    teams.forEach(team => {
-        const name = team.querySelector('.team-name').textContent.toLowerCase();
-        const city = team.querySelector('.team-city').textContent.toLowerCase();
-        
-        if (name.includes(searchTerm) || city.includes(searchTerm)) {
-            team.style.display = 'block';
-        } else {
-            team.style.display = 'none';
-        }
-    });
-}
+// (удалено) validatePreferencesForm — не используется
+// (удалено) searchTeams — дублировала поиск внутри filterTeams
 
 // Мониторинг производительности
 function logPerformance() {
@@ -851,8 +907,13 @@ function createTeamModal() {
 
 // Функция фильтрации команд
 function filterTeams(filter) {
+    console.log('Filtering teams with filter:', filter);
     const allTeams = document.querySelectorAll('.team-card');
+    console.log('Total teams:', allTeams.length);
     const filterButtons = document.querySelectorAll('.filter-btn');
+    
+    // Сохранить состояние фильтра в sessionStorage
+    sessionStorage.setItem('nbaFilter', filter);
     
     // Обновить активную кнопку
     filterButtons.forEach(btn => btn.classList.remove('active'));
@@ -863,37 +924,241 @@ function filterTeams(filter) {
     
     // Фильтровать команды
     allTeams.forEach(team => {
-        const favoriteBtn = team.querySelector('.favorite-btn');
-        // Проверить, является ли команда избранной на основе активного класса кнопки
-        const isFavorite = favoriteBtn && favoriteBtn.classList.contains('active');
-        
+        // Для фильтра "избранное" проверяем атрибут data-is-favorite
         if (filter === 'all') {
-            // Для "всех команд", показать все команды, соответствующие поиску (или все, если нет поиска)
-            const searchInput = document.getElementById('searchInput');
-            const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
-            
-            if (searchTerm) {
-                // Если есть поисковый запрос, проверить, соответствует ли команда поиску
-                const name = team.querySelector('.team-name').textContent.toLowerCase();
-                const city = team.querySelector('.team-city').textContent.toLowerCase();
-                const matchesSearch = name.includes(searchTerm) || city.includes(searchTerm);
-                team.style.display = matchesSearch ? 'block' : 'none';
-            } else {
-                // Если нет поискового запроса, показать все команды
-                team.style.display = 'block';
-            }
+            // Для "всех команд", показать все команды
+            team.style.display = 'block';
         } else if (filter === 'favorites') {
+            // Для "избранных" проверяем атрибут data-is-favorite
+            const isFavorite = team.dataset.isFavorite === 'true';
             team.style.display = isFavorite ? 'block' : 'none';
+            console.log(`Team ${team.dataset.teamId} favorite status: ${isFavorite}`);
         }
     });
     
     // Показать сообщение, если нет избранных
-    const visibleFavorites = document.querySelectorAll('.team-card .favorite-btn.active');
+    const visibleFavorites = Array.from(allTeams).filter(team => team.dataset.isFavorite === 'true' && team.style.display !== 'none');
+    console.log('Visible favorites count:', visibleFavorites.length);
     if (filter === 'favorites' && visibleFavorites.length === 0) {
         showNoFavoritesMessage();
     } else {
         hideNoFavoritesMessage();
     }
+    
+    // Обновить состояние поиска при переключении фильтров
+    const searchBar = document.getElementById('searchBar');
+    if (searchBar) {
+        if (filter === 'all') {
+            searchBar.style.display = 'block';
+            // При переключении на "все команды" выполнить поиск, если есть поисковый запрос
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                // Выполнить поиск только если есть значение для поиска
+                if (searchInput.value.trim() !== '') {
+                    performSearch(searchInput.value);
+                }
+            }
+        } else {
+            searchBar.style.display = 'none';
+            // Очистить поиск при переключении на избранные
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = '';
+                // Не выполнять поиск с пустым запросом
+            }
+        }
+    }
+}
+
+// Добавим обработчик для динамического поиска
+function initializeSearch() {
+    const searchInput = document.getElementById('searchInput');
+    const searchForm = searchInput ? searchInput.closest('form') : null;
+    
+    if (searchInput) {
+        // Предотвратить отправку формы при нажатии Enter
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                // Выполнить поиск немедленно
+                performSearch(this.value);
+            }
+        });
+        
+        // Предотвратить отправку формы при нажатии кнопки поиска
+        if (searchForm) {
+            searchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                // Выполнить поиск немедленно
+                performSearch(searchInput.value);
+            });
+        }
+        
+        // Добавить обработчик для динамического поиска
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            // Очистить предыдущий таймаут
+            clearTimeout(searchTimeout);
+            
+            // Установить новый таймаут для debounce
+            searchTimeout = setTimeout(() => {
+                performSearch(this.value);
+            }, 300); // Задержка 300 мс
+        });
+    }
+}
+
+// Функция для выполнения поиска через AJAX
+function performSearch(searchTerm) {
+    // Получить CSRF токен
+    const csrftoken = getCookie('csrftoken');
+    
+    // Выполнить AJAX-запрос
+    // Важно: даже если searchTerm пустой, мы все равно выполняем запрос для получения всех команд
+    fetch(`/?search=${encodeURIComponent(searchTerm || '')}`, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': csrftoken
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        updateTeamsDisplay(data.teams);
+    })
+    .catch(error => {
+        console.error('Ошибка поиска:', error);
+    });
+}
+
+// Функция для обновления отображения команд
+function updateTeamsDisplay(teams) {
+    const teamsGrid = document.querySelector('.teams-grid');
+    if (!teamsGrid) return;
+    
+    // Очистить текущее содержимое
+    while (teamsGrid.firstChild) {
+        teamsGrid.removeChild(teamsGrid.firstChild);
+    }
+    
+    // Если нет команд, показать сообщение
+    if (teams.length === 0) {
+        const noTeamsMessage = document.createElement('div');
+        noTeamsMessage.className = 'no-teams';
+        noTeamsMessage.innerHTML = `
+            <i class="fas fa-search"></i>
+            <h3>Команды не найдены</h3>
+            <p>Попробуйте изменить поисковый запрос</p>
+        `;
+        teamsGrid.appendChild(noTeamsMessage);
+        return;
+    }
+    
+    // Получить текущие избранные команды из cookies для синхронизации
+    let favoriteList = [];
+    try {
+        const favoritesCookie = getCookie('favorite_teams');
+        console.log('Favorites cookie value:', favoritesCookie);
+        if (favoritesCookie) {
+            favoriteList = JSON.parse(favoritesCookie);
+            console.log('Favorite list from cookies:', favoriteList);
+        }
+    } catch (e) {
+        console.error('Ошибка при разборе избранных команд:', e);
+    }
+    
+    // Создать HTML для каждой команды
+    teams.forEach(team => {
+        // Убедиться, что статус избранного синхронизирован
+        const isFavorite = favoriteList.includes(team.id);
+        console.log(`Team ${team.id} is favorite: ${isFavorite}`);
+        
+        const teamCard = document.createElement('div');
+        teamCard.className = 'team-card';
+        teamCard.dataset.teamId = team.id;
+        // Добавляем атрибут для отслеживания избранного статуса
+        teamCard.dataset.isFavorite = isFavorite ? 'true' : 'false';
+        
+        // Получить текущий язык для переводов
+        const currentLang = getCookie('django_language') || 'en';
+        
+        // Определить тексты в зависимости от языка
+        const removeFromFavoritesText = currentLang === 'ru' ? 'Убрать из избранного' : 'Remove from favorites';
+        const addToFavoritesText = currentLang === 'ru' ? 'Добавить в избранное' : 'Add to favorites';
+        const quickInfoText = currentLang === 'ru' ? 'Быстрая информация' : 'Quick Info';
+        const conferenceText = currentLang === 'ru' ? 'Конференция:' : 'Conference:';
+        const divisionText = currentLang === 'ru' ? 'Дивизион:' : 'Division:';
+        
+        teamCard.innerHTML = `
+            <div class="team-header">
+                <div class="team-logo">
+                    <div class="team-initials" data-color1="${team.colors[0]}" data-color2="${team.colors[1] || team.colors[0]}">
+                    </div>
+                </div>
+                <button class="favorite-btn toggle-favorite-btn ${isFavorite ? 'active' : ''}" 
+                        data-team-id="${team.id}"
+                        title="${isFavorite ? removeFromFavoritesText : addToFavoritesText}">
+                    <i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>
+                </button>
+            </div>
+            
+            <div class="team-info">
+                <h3 class="team-name">${team.name}</h3>
+                <p class="team-city"><i class="fas fa-map-marker-alt"></i> ${team.city}</p>
+                
+                <div class="team-details">
+                    <div class="detail-item">
+                        <span class="detail-label">${conferenceText}</span>
+                        <span class="detail-value">${team.conference}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">${divisionText}</span>
+                        <span class="detail-value">${team.division}</span>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary team-info-btn" data-team-id="${team.id}">
+                    <i class="fas fa-info-circle"></i>
+                    ${quickInfoText}
+                </button>
+            </div>
+        `;
+        
+        teamsGrid.appendChild(teamCard);
+    });
+    
+    // Переинициализировать обработчики событий для новых элементов
+    initializeTeamCardEvents();
+    
+    // Применить текущий фильтр после обновления
+    const currentFilter = sessionStorage.getItem('nbaFilter') || 'favorites';
+    filterTeams(currentFilter);
+}
+
+// Функция для инициализации обработчиков событий карточек команд
+function initializeTeamCardEvents() {
+    // Инициализировать цвета команд
+    document.querySelectorAll('.team-initials[data-color1]').forEach(element => {
+        const color1 = element.dataset.color1;
+        const color2 = element.dataset.color2;
+        element.style.background = `linear-gradient(135deg, ${color1}, ${color2})`;
+    });
+    
+    // Добавить обработчики для кнопок избранного
+    document.querySelectorAll('.toggle-favorite-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const teamId = parseInt(this.dataset.teamId);
+            toggleFavorite(teamId);
+        });
+    });
+    
+    // Добавить обработчики для кнопок информации
+    document.querySelectorAll('.team-info-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const teamId = parseInt(this.dataset.teamId);
+            showTeamInfo(teamId);
+        });
+    });
 }
 
 // Показать сообщение об отсутствии избранных

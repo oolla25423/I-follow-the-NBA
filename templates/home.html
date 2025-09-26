@@ -15,7 +15,7 @@
     <section class="teams-section">
         <div class="section-header">
             <div class="filter-controls">
-                <button class="btn filter-btn active" data-filter="favorites">
+                <button class="btn filter-btn active" data-filter="favorites" onclick="window.location.reload(); return false;">
                     <i class="fas fa-heart"></i> {% trans "Favorites Only" %}
                 </button>
                 <button class="btn filter-btn" data-filter="all">
@@ -26,8 +26,8 @@
         </div>
 
         <div class="search-bar" id="searchBar" style="display: none;">
-            <form method="get">
-                <input type="text" id="searchInput" name="search" placeholder="{% trans 'Search teams...' %}" />
+            <form method="get" id="searchForm">
+                {{ search_form.search }}
                 <button type="submit" class="search-btn">
                     <i class="fas fa-search"></i>
                 </button>
@@ -36,7 +36,7 @@
 
         <div class="teams-grid">
             {% for team in teams %}
-            <div class="team-card" data-team-id="{{ team.id }}">
+            <div class="team-card" data-team-id="{{ team.id }}" data-is-favorite="{% if team.is_favorite %}true{% else %}false{% endif %}">
                 <div class="team-header">
                     <div class="team-logo">
                         <div class="team-initials" data-color1="{{ team.colors.0 }}" data-color2="{{ team.colors.1|default:team.colors.0 }}">
@@ -155,28 +155,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Add search functionality
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            const query = this.value.toLowerCase();
-            const teams = document.querySelectorAll('.team-card');
-            
-            teams.forEach(team => {
-                const name = team.querySelector('.team-name').textContent.toLowerCase();
-                const city = team.querySelector('.team-city').textContent.toLowerCase();
-                
-                if (name.includes(query) || city.includes(query)) {
-                    team.style.display = 'block';
-                } else {
-                    team.style.display = 'none';
-                }
-            });
-        });
-    }
-    
-    // Initialize with favorites filter
+    // Всегда показывать избранные при загрузке страницы (вместо сохраненного состояния)
     setTimeout(() => {
+        // Всегда устанавливать фильтр в 'favorites' вместо проверки сохраненного состояния
         if (window.filterTeams && typeof window.filterTeams === 'function') {
             window.filterTeams('favorites');
         }

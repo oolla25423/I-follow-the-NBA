@@ -5,21 +5,44 @@ import json
 from .models import get_all_teams, LANGUAGE_CHOICES, THEME_CHOICES
 from .forms import SearchForm
 
-
-
 # Представление для главной страницы
 def home(request):
-    # Обработка POST-запроса для поиска
-    if request.method == 'POST':
-        form = SearchForm(request.POST)
+    # Обработка AJAX-запроса для поиска
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' and request.method == 'GET':
+        search_term = request.GET.get('search', '')
+        teams = get_all_teams()
+        
+        # Фильтрация команд по поисковому запросу
+        if search_term:
+            teams = [team for team in teams if search_term.lower() in team['name'].lower() or search_term.lower() in team['city'].lower()]
+        
+        # Получение избранных команд из cookies
+        favorites = request.COOKIES.get('favorite_teams', '[]')
+        try:
+            favorite_list = json.loads(favorites)
+        except (json.JSONDecodeError, TypeError):
+            favorite_list = []
+        
+        # Пометить команды как избранные
+        for team in teams:
+            team['is_favorite'] = team['id'] in favorite_list
+        
+        # Возвращаем только данные команд в формате JSON для AJAX-запросов
+        return JsonResponse({'teams': teams})
+    
+    # Обычная загрузка страницы
+    search_term = ''
+    if request.method == 'GET':
+        form = SearchForm(request.GET)
         if form.is_valid():
             search_term = form.cleaned_data['search']
-            teams = get_all_teams()
-            teams = [team for team in teams if search_term.lower() in team['name'].lower()]
-            return render(request, 'home.html', {'teams': teams})
-
+    
     # Получение всех команд
     teams = get_all_teams()
+    
+    # Фильтрация команд по поисковому запросу, если он есть
+    if search_term:
+        teams = [team for team in teams if search_term.lower() in team['name'].lower() or search_term.lower() in team['city'].lower()]
     
     # Получение избранных команд из cookies
     favorites = request.COOKIES.get('favorite_teams', '[]')
@@ -35,7 +58,8 @@ def home(request):
     # Подготовить контекст для шаблона
     context = {
         'teams': teams,
-        'favorite_count': len(favorite_list)
+        'favorite_count': len(favorite_list),
+        'search_form': SearchForm(initial={'search': search_term})  # Передать форму с начальным значением
     }
     return render(request, 'home.html', context)
 

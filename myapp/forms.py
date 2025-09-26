@@ -3,4 +3,4 @@ from django import forms
 # Форма поиска команд
 class SearchForm(forms.Form):
     # Поле поиска
-    search = forms.CharField(label='Поиск', max_length=100)
+    search = forms.CharField(label='Поиск', max_length=100, widget=forms.TextInput(attrs={'placeholder': 'Поиск команд...', 'id': 'searchInput', 'name': 'search'}))
